@@ -1,21 +1,26 @@
-# React + Vite
+# Deployment
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+1. Clone the GitHub repo
+```
+git clone https://github.com/cwaltsgeo/EIC-Mobile
+```
 
-Currently, two official plugins are available:
+2. Navigate to the project's folder
+```
+cd EIC-Mobile
+```
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+3. Install the project's dependencies
+```
+npm install
+```
 
-# ArcGIS Maps SDK for JavaScript
+4. Run the project in dev mode
+```
+npm run dev
+```
 
-# Headless UI
-
-# Tailwind.css
-
-Installation:
-- [Install Tailwind.css for Vite](https://tailwindcss.com/docs/guides/vite)
-
-# Chart.js
-
-# HeroIcons
+5. Build the project
+```
+npm run build
+```
