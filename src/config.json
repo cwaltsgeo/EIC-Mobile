@@ -16,32 +16,12 @@
             {
                 "stop": 0,
                 "location": {
-                    "latitude": 37.7749,
-                    "longitude": -122.4194,
-                    "zoom": 5,
+                    "latitude": 0,
+                    "longitude": 25,
+                    "zoom": 1,
                     "delay": 8000
                 },
                 "text": "This is the first stop on the CO tour"
-            },
-            {
-                "stop": 1,
-                "location": {
-                    "latitude": 0,
-                    "longitude": -95,
-                    "zoom": 4,
-                    "delay": 3000
-                },
-                "text": "This is the second stop on the CO tour"
-            },
-            {
-                "stop": 2,
-                "location": {
-                    "latitude": 0,
-                    "longitude": 95,
-                    "zoom": 4,
-                    "delay": 3000
-                },
-                "text": "This is the third stop on the CO tour"
             }
         ]
     },
@@ -113,7 +93,7 @@
                     "zoom": 2,
                     "delay": 10000
                 },
-                "text": "Nitrogne Oxides have a short lifespan and are concentrated near the sources that emitted them. They are visible in the animation near urban areas, power plants, and shipping lanes. Here in the Indian Ocean, we can clearly see the Nitrogen Oxide pollution from the shipping industry in the region."
+                "text": "Nitrogen Oxides have a short lifespan and are concentrated near the sources that emitted them. They are visible in the animation near urban areas, power plants, and shipping lanes. Here in the Indian Ocean, we can clearly see the Nitrogen Oxide pollution from the shipping industry in the region."
             }
         ]
     }

@@ -1,10 +1,12 @@
-
 import { useContext, useState, useEffect, useRef } from "react";
-import { MapViewContext, ChartSelectionContext, VitalSelectionContext, CurrentJSONContext } from '../contexts/AppContext';
-import Chart from 'chart.js/auto';
-import crosshairPlugin from 'chartjs-plugin-crosshair';
+
 import ImageIdentifyParameters from "@arcgis/core/rest/support/ImageIdentifyParameters";
 import * as imageService from "@arcgis/core/rest/imageService.js";
+
+import Chart from 'chart.js/auto';
+import crosshairPlugin from 'chartjs-plugin-crosshair';
+
+import { MapViewContext, ChartSelectionContext, VitalSelectionContext, CurrentJSONContext } from '../contexts/AppContext';
 
 export default function Panel() {
 
@@ -56,27 +58,20 @@ export default function Panel() {
                         plugins: {
                             crosshair: {
                                 line: {
-                                    color: '#F66',  // crosshair line color
-                                    width: 1        // crosshair line width
+                                    color: '#F66',
+                                    width: 1
                                 },
                                 snap: true,
                                 sync: {
-                                    enabled: true,            // enable trace line syncing with other charts
-                                    group: 1,                 // chart group
-                                    suppressTooltips: false   // suppress tooltips when showing a synced tracer
-                                },
-                                zoom: {
-                                    enabled: false,                                      // enable zooming
-                                    zoomboxBackgroundColor: 'rgba(90, 92, 105, 0.1)',    // background color of zoom box 
-                                    zoomboxBorderColor: 'rgba(90, 92, 105, 0.5)',        // border color of zoom box
-                                    zoomButtonText: 'Reset Zoom',                        // reset zoom button text
-                                    zoomButtonClass: 'reset-zoom'                        // reset zoom button class
+                                    enabled: true,   
+                                    group: 1,
+                                    suppressTooltips: false
                                 },
                                 callbacks: {
-                                    beforeZoom: function (start, end) {                  // called before zoom, return false to prevent zoom
+                                    beforeZoom: function (start, end) {
                                         return true;
                                     },
-                                    afterZoom: function (start, end) {                   // called after zoom
+                                    afterZoom: function (start, end) {
                                     }
                                 }
                             }
@@ -91,6 +86,7 @@ export default function Panel() {
         }
     }, [chartData, chartInstance, currentJSON]);
 
+    // Feed the chart with pixel values
     const queryPixels = (event) => {
         console.log("Querying Pixels");
 
@@ -107,9 +103,6 @@ export default function Panel() {
             var timeStamps = []
 
             if (results.value) {
-                console.log(results);
-
-                // parse the pixel values and time stamps
                 results.value.split('; ').map(Number).map(i => pixelValues.push(i));
                 results.properties.Attributes.map(i => timeStamps.push(i.StdTime));
                 //timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" }));
@@ -119,12 +112,14 @@ export default function Panel() {
         });
     };
 
+    // Add onClick event listener to the map view when the chart panel is selected
     if (!vitalSelection && chartSelection) {
         if (!clickHandle) {
             console.log("Adding handles");
             mapView.addHandles(mapView.on("click", queryPixels));
             setClickHandle(true);
         };
+    // Remove the onClick event listener when the chart panel is deselecteds
     } else if ((vitalSelection && !chartSelection) || (!chartSelection)) {
         if (clickHandle) {
             console.log("Removing handles");

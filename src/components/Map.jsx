@@ -1,6 +1,6 @@
 import { useContext, useEffect, useRef } from 'react';
 
-import products from "../products.json";
+import config from "../config.json";
 
 import Map from "@arcgis/core/Map.js";
 import Extent from "@arcgis/core/geometry/Extent";
@@ -21,15 +21,13 @@ import Popup from "@arcgis/core/widgets/Popup";
 import { MapViewContext } from '../contexts/AppContext';
 
 export default function Home() {
+
   const mapDiv = useRef(null);
   const { setMapView } = useContext(MapViewContext);
 
   useEffect(() => {
     let layer_list = [];
-    products.forEach(layer => {
-      console.log(layer)
-      // create a video element by setting video param to point to the video file url
-      // set the geographic location of the video file on the map using an extent
+    config.forEach(layer => {
       const element = new VideoElement({
         video: layer.video,
         georeference: new ExtentAndRotationGeoreference({
@@ -45,7 +43,6 @@ export default function Home() {
         })
       });
 
-      // add the video element to the media layer
       const mediaLayer = new MediaLayer({
         source: [element],
         title: layer.name,
@@ -130,7 +127,6 @@ export default function Home() {
 
     return () => {
       if (view) {
-        // destroy the map view
         view.destroy();
       }
     }

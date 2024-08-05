@@ -1,10 +1,14 @@
-import React, { useState, useContext } from 'react';
+import { useContext } from 'react';
+
 import Vitals from './Vitals';
 import Data from './Data';
 import LineChart from './LineChart';
+
 import { ChartSelectionContext, VitalSelectionContext, DataSelectionContext } from '../contexts/AppContext';
 
+// Panel component to display the selected chart, vitals, or data
 export default function Panel() {
+
     const { chartSelection } = useContext(ChartSelectionContext);
     const { vitalSelection } = useContext(VitalSelectionContext);
     const { dataSelection } = useContext(DataSelectionContext);

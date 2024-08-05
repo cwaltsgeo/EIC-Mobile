@@ -1,13 +1,16 @@
+import { useRef, useContext, useEffect, useState } from 'react';
+
 import Sketch from "@arcgis/core/widgets/Sketch";
 import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
 import TimeExtent from "@arcgis/core/TimeExtent";
 import ImageHistogramParameters from "@arcgis/core/rest/support/ImageHistogramParameters";
 import * as imageService from "@arcgis/core/rest/imageService.js";
 
-import { useRef, useContext, useEffect, useState } from 'react';
 import { MapViewContext, VitalSelectionContext, CurrentJSONContext } from '../contexts/AppContext';
 
+// Vitals component to display the selected layer's summary statistics
 export default function Vitals() {
+
     const { mapView } = useContext(MapViewContext);
     const { currentJSON } = useContext(CurrentJSONContext);
     const { vitalSelection } = useContext(VitalSelectionContext);
@@ -16,7 +19,6 @@ export default function Vitals() {
     const sketchRef = useRef(null);
     const debounceRef = useRef(null);
 
-    // Function to add sketchLayer to mapView
     const addSketchLayer = () => {
         const graphicsLayer = new GraphicsLayer();
         mapView.map.add(graphicsLayer);
@@ -26,17 +28,17 @@ export default function Vitals() {
             view: mapView,
             creationMode: "update",
             container: sketchRef.current,
-            availableCreateTools: ["polygon", "rectangle", "circle"], // Only allow polygon creation
+            availableCreateTools: ["polygon", "rectangle", "circle"],
             visibleElements: {
                 createTools: {
                     point: true,
                     polyline: false,
-                    polygon: true, // Enable polygon tool
+                    polygon: true,
                     rectangle: true,
                     circle: true
                 },
                 selectionTools: {
-                    "rectangle-selection": false, // Enable rectangle selection tool
+                    "rectangle-selection": false,
                     "lasso-selection": false
                 },
                 undoRedoMenu: false,
@@ -44,23 +46,22 @@ export default function Vitals() {
             }
         });
 
+        // Time extent for the statistics
         const timeExtent = new TimeExtent({
-            start: new Date(Date.UTC(2021, 9, 1)),
-            end: new Date(Date.UTC(2024, 3, 31))
+            start: new Date(Date.UTC(2020, 1, 1)),
+            end: new Date(Date.UTC(2030, 1, 1))
         });
 
-        // Listen for the update event
+        // Update summary statistics when user moves the sketch, 10ms debounce
         sketch.on('update', event => {
             if (debounceRef.current) {
-                clearTimeout(debounceRef.current); // Clear the existing timeout
+                clearTimeout(debounceRef.current);
             }
             debounceRef.current = setTimeout(() => {
                 if (event.state === 'active' && event.graphics.length > 0) {
                     const graphic = event.graphics[0];
                     const extent = graphic.geometry.extent;
 
-                    // set the histogram parameters to request
-                    // data for the current view extent and resolution
                     const params = new ImageHistogramParameters({
                         geometry: extent,
                         timeExtent: timeExtent
@@ -69,7 +70,6 @@ export default function Vitals() {
                     // request for histograms and statistics for the specified parameters
                     imageService.computeStatisticsHistograms(currentJSON.service, params).then(function (results) {
                         if (results.statistics && results.statistics[0]) {
-                            console.log(results.statistics[0]); // Log the statistics of the sketch polygon
                             const prediction = (results.statistics[0].mean - results.statistics[0].median) * 0.5 + results.statistics[0].mean;
                             const newVitals = {
                                 globalMin: results.statistics[0].min.toFixed(2),
@@ -79,14 +79,14 @@ export default function Vitals() {
                             }
                             setVitals(newVitals);
                         } else {
-                            setVitals({ globalMin: "-", globalMax: "-", globalAverage: "-", globalTrend: "-" }); // Set globalVitals to null if results.statistics[0] is undefined
+                            setVitals({ globalMin: "-", globalMax: "-", globalAverage: "-", globalTrend: "-" });
                         }
                     })
                         .catch(function (err) {
                             console.log("err", err)
                         });
                 }
-            }, 10);
+            }, 10); // 10ms debounce, increase if needed
 
         });
     };
@@ -154,47 +154,5 @@ export default function Vitals() {
                 </div>
             </div>
         </div>
-
-        // <section className="h-full overflow-auto">
-        //     <div ref={sketchRef} className="absolute top-0 right-0 left-0 mx-auto content-center rounded"></div>
-        //     <div className="absolute top-2 right-0 left-2 mx-auto content-center text-white">{layerName.layerName} ({layerName.layerUnit})</div>
-        //     <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 h-full content-center">
-        //         <div className="flex flex-col flex-1 gap-10 lg:gap-0 lg:flex-row lg:justify-between mt-12">
-        //             <div className="w-full lg:w-1/4 border-b pb-10 lg:border-b-0 lg:pb-0 lg:border-r border-black">
-        //                 <div
-        //                     className="font-manrope font-bold text-5xl text-gray-900 mb-5 text-center">
-        //                     {vitals.globalAverage}
-        //                 </div>
-        //                 <span className="text-xl text-black text-center block ">Average
-        //                 </span>
-        //             </div>
-        //             <div className="w-full lg:w-1/4 border-b pb-10 lg:border-b-0 lg:pb-0 lg:border-r border-black">
-        //                 <div
-        //                     className="font-manrope font-bold text-5xl text-gray-900 mb-5 text-center ">
-        //                     {vitals.globalMin}
-        //                 </div>
-        //                 <span className="text-xl text-black text-center block ">Minimum
-        //                 </span>
-        //             </div>
-        //             <div className="w-full lg:w-1/4 border-b pb-10 lg:border-b-0 lg:pb-0 lg:border-r border-black">
-        //                 <div
-        //                     className="font-manrope font-bold text-5xl text-gray-900 mb-5 text-center ">
-        //                     {vitals.globalMax}
-        //                 </div>
-        //                 <span className="text-xl text-black text-center block ">Maximum
-        //                 </span>
-        //             </div>
-        //             <div className="w-full lg:w-1/4  ">
-        //                 <div
-        //                     className="font-manrope font-bold text-5xl text-gray-900 mb-5 text-center ">
-        //                     {vitals.globalTrend}
-        //                 </div>
-        //                 <span className="text-xl text-black text-center block ">Trend
-        //                 </span>
-        //             </div>
-        //         </div>
-        //     </div>
-        // </section>
-
     );
 }
