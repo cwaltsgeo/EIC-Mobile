@@ -1,10 +1,10 @@
 import { useRef, useContext, useEffect, useState } from 'react';
 
-import Sketch from "@arcgis/core/widgets/Sketch";
-import GraphicsLayer from "@arcgis/core/layers/GraphicsLayer";
-import TimeExtent from "@arcgis/core/TimeExtent";
-import ImageHistogramParameters from "@arcgis/core/rest/support/ImageHistogramParameters";
-import * as imageService from "@arcgis/core/rest/imageService.js";
+import Sketch from '@arcgis/core/widgets/Sketch';
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import TimeExtent from '@arcgis/core/TimeExtent';
+import ImageHistogramParameters from '@arcgis/core/rest/support/ImageHistogramParameters';
+import * as imageService from '@arcgis/core/rest/imageService.js';
 
 import { MapViewContext, VitalSelectionContext, CurrentJSONContext } from '../contexts/AppContext';
 
@@ -26,9 +26,9 @@ export default function Vitals() {
         const sketch = new Sketch({
             layer: graphicsLayer,
             view: mapView,
-            creationMode: "update",
+            creationMode: 'update',
             container: sketchRef.current,
-            availableCreateTools: ["polygon", "rectangle", "circle"],
+            availableCreateTools: ['polygon', 'rectangle', 'circle'],
             visibleElements: {
                 createTools: {
                     point: true,
@@ -38,8 +38,8 @@ export default function Vitals() {
                     circle: true
                 },
                 selectionTools: {
-                    "rectangle-selection": false,
-                    "lasso-selection": false
+                    'rectangle-selection': false,
+                    'lasso-selection': false
                 },
                 undoRedoMenu: false,
                 settingsMenu: false
@@ -79,11 +79,11 @@ export default function Vitals() {
                             }
                             setVitals(newVitals);
                         } else {
-                            setVitals({ globalMin: "-", globalMax: "-", globalAverage: "-", globalTrend: "-" });
+                            setVitals({ globalMin: '-', globalMax: '-', globalAverage: '-', globalTrend: '-' });
                         }
                     })
                         .catch(function (err) {
-                            console.log("err", err)
+                            console.log('err', err)
                         });
                 }
             }, 10); // 10ms debounce, increase if needed
@@ -110,7 +110,7 @@ export default function Vitals() {
             }
         });
 
-        sketchRef.current.innerHTML = "";
+        sketchRef.current.innerHTML = '';
     };
 
     useEffect(() => {
@@ -124,31 +124,31 @@ export default function Vitals() {
     }, [mapView, vitalSelection, currentJSON]);
 
     return (
-        <div className="px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20">
-            <div ref={sketchRef} className="absolute top-0 right-0 left-0 mx-auto content-center text-white"></div>
-            <div className="absolute top-2 right-50 left-2 mx-auto content-center text-white">{layerName.layerName} ({layerName.layerUnit})</div>
-            <div className="grid grid-cols-2 gap-8 md:grid-cols-4 mt-4">
-                <div className="text-center md:border-r">
-                    <h6 className="text-4xl font-bold lg:text-5xl xl:text-6xl">{vitals.globalAverage}</h6>
-                    <p className="text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base">
+        <div className='px-4 py-16 mx-auto sm:max-w-xl md:max-w-full lg:max-w-screen-xl md:px-24 lg:px-8 lg:py-20'>
+            <div ref={sketchRef} className='absolute top-0 right-0 left-0 mx-auto content-center text-white'></div>
+            <div className='absolute top-2 right-50 left-2 mx-auto content-center text-white'>{layerName.layerName} ({layerName.layerUnit})</div>
+            <div className='grid grid-cols-2 gap-8 md:grid-cols-4 mt-4'>
+                <div className='text-center md:border-r'>
+                    <h6 className='text-4xl font-bold lg:text-5xl xl:text-6xl'>{vitals.globalAverage}</h6>
+                    <p className='text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base'>
                         Average
                     </p>
                 </div>
-                <div className="text-center md:border-r">
-                    <h6 className="text-4xl font-bold lg:text-5xl xl:text-6xl">{vitals.globalTrend}</h6>
-                    <p className="text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base">
+                <div className='text-center md:border-r'>
+                    <h6 className='text-4xl font-bold lg:text-5xl xl:text-6xl'>{vitals.globalTrend}</h6>
+                    <p className='text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base'>
                         Trend
                     </p>
                 </div>
-                <div className="text-center md:border-r">
-                    <h6 className="text-4xl font-bold lg:text-5xl xl:text-6xl">{vitals.globalMax}</h6>
-                    <p className="text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base">
+                <div className='text-center md:border-r'>
+                    <h6 className='text-4xl font-bold lg:text-5xl xl:text-6xl'>{vitals.globalMax}</h6>
+                    <p className='text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base'>
                         Maximum
                     </p>
                 </div>
-                <div className="text-center">
-                    <h6 className="text-4xl font-bold lg:text-5xl xl:text-6xl">{vitals.globalMin}</h6>
-                    <p className="text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base">
+                <div className='text-center'>
+                    <h6 className='text-4xl font-bold lg:text-5xl xl:text-6xl'>{vitals.globalMin}</h6>
+                    <p className='text-sm font-medium tracking-widest text-gray-800 uppercase lg:text-base'>
                         Minimum
                     </p>
                 </div>

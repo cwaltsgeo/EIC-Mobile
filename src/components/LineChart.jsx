@@ -1,7 +1,7 @@
-import { useContext, useState, useEffect, useRef } from "react";
+import { useContext, useState, useEffect, useRef } from 'react';
 
-import ImageIdentifyParameters from "@arcgis/core/rest/support/ImageIdentifyParameters";
-import * as imageService from "@arcgis/core/rest/imageService.js";
+import ImageIdentifyParameters from '@arcgis/core/rest/support/ImageIdentifyParameters';
+import * as imageService from '@arcgis/core/rest/imageService.js';
 
 import Chart from 'chart.js/auto';
 import crosshairPlugin from 'chartjs-plugin-crosshair';
@@ -88,7 +88,7 @@ export default function Panel() {
 
     // Feed the chart with pixel values
     const queryPixels = (event) => {
-        console.log("Querying Pixels");
+        console.log('Querying Pixels');
 
         const params = new ImageIdentifyParameters({
             geometry: event.mapPoint,
@@ -105,8 +105,8 @@ export default function Panel() {
             if (results.value) {
                 results.value.split('; ').map(Number).map(i => pixelValues.push(i));
                 results.properties.Attributes.map(i => timeStamps.push(i.StdTime));
-                //timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { year: "numeric", month: "numeric", day: "numeric" }));
-                timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { month: "numeric", day: "numeric", hour: "numeric" }));
+                //timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { year: 'numeric', month: 'numeric', day: 'numeric' }));
+                timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric', hour: 'numeric' }));
                 setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
             }
         });
@@ -115,14 +115,14 @@ export default function Panel() {
     // Add onClick event listener to the map view when the chart panel is selected
     if (!vitalSelection && chartSelection) {
         if (!clickHandle) {
-            console.log("Adding handles");
-            mapView.addHandles(mapView.on("click", queryPixels));
+            console.log('Adding handles');
+            mapView.addHandles(mapView.on('click', queryPixels));
             setClickHandle(true);
         };
     // Remove the onClick event listener when the chart panel is deselecteds
     } else if ((vitalSelection && !chartSelection) || (!chartSelection)) {
         if (clickHandle) {
-            console.log("Removing handles");
+            console.log('Removing handles');
             mapView?.removeHandles(mapView.queryPixels);
             setClickHandle(false);
         }
