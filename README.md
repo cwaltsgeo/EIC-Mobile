@@ -41,8 +41,6 @@ Test in dev mode
 npm run dev
 ```
 
-End with an example of getting some data out of the system or using it for a little demo
-
 ## Configuration
 
 The ```config.json``` file is a vital metadata file that points the application to the proper video and image service endpoints. For the application to run properly, it’s important to configure the file according to the following parameters.
@@ -101,7 +99,7 @@ aws s3 sync ./dist s3://<your-bucket-name>/
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+This project is licensed under the MIT License
 
 ## Acknowledgments
 
