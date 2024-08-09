@@ -54,39 +54,95 @@ export default function Vitals() {
 
         // Update summary statistics when user moves the sketch, 10ms debounce
         sketch.on('update', event => {
-            if (debounceRef.current) {
-                clearTimeout(debounceRef.current);
-            }
-            debounceRef.current = setTimeout(() => {
-                if (event.state === 'active' && event.graphics.length > 0) {
-                    const graphic = event.graphics[0];
-                    const extent = graphic.geometry.extent;
+            if (!currentJSON.wcs) {
+                console.log('...from Image Service');
+                if (debounceRef.current) {
+                    clearTimeout(debounceRef.current);
+                }
+                debounceRef.current = setTimeout(() => {
+                    if (event.state === 'active' && event.graphics.length > 0) {
+                        const graphic = event.graphics[0];
+                        const extent = graphic.geometry.extent;
 
-                    const params = new ImageHistogramParameters({
-                        geometry: extent,
-                        timeExtent: timeExtent
-                    });
+                        const params = new ImageHistogramParameters({
+                            geometry: extent,
+                            timeExtent: timeExtent
+                        });
 
-                    // request for histograms and statistics for the specified parameters
-                    imageService.computeStatisticsHistograms(currentJSON.service, params).then(function (results) {
-                        if (results.statistics && results.statistics[0]) {
-                            const prediction = (results.statistics[0].mean - results.statistics[0].median) * 0.5 + results.statistics[0].mean;
-                            const newVitals = {
-                                globalMin: results.statistics[0].min.toFixed(2),
-                                globalMax: results.statistics[0].max.toFixed(2),
-                                globalAverage: results.statistics[0].mean.toFixed(2),
-                                globalTrend: prediction.toFixed(2)
+                        // request for histograms and statistics for the specified parameters
+                        imageService.computeStatisticsHistograms(currentJSON.service, params).then(function (results) {
+                            if (results.statistics && results.statistics[0]) {
+                                const prediction = (results.statistics[0].mean - results.statistics[0].median) * 0.5 + results.statistics[0].mean;
+                                const newVitals = {
+                                    globalMin: results.statistics[0].min.toFixed(2),
+                                    globalMax: results.statistics[0].max.toFixed(2),
+                                    globalAverage: results.statistics[0].mean.toFixed(2),
+                                    globalTrend: prediction.toFixed(2)
+                                }
+                                setVitals(newVitals);
+                            } else {
+                                setVitals({ globalMin: '-', globalMax: '-', globalAverage: '-', globalTrend: '-' });
                             }
-                            setVitals(newVitals);
-                        } else {
-                            setVitals({ globalMin: '-', globalMax: '-', globalAverage: '-', globalTrend: '-' });
-                        }
-                    })
-                        .catch(function (err) {
+                        }).catch(function (err) {
                             console.log('err', err)
                         });
+                    }
+                }, 10); // 10ms debounce, increase if needed
+            } else {
+                console.log('...from WCS');
+                if (debounceRef.current) {
+                    clearTimeout(debounceRef.current);
                 }
-            }, 10); // 10ms debounce, increase if needed
+                debounceRef.current = setTimeout(() => {
+                    if (event.state === 'active' && event.graphics.length > 0) {
+                        const graphic = event.graphics[0];
+                        const extent = graphic.geometry.extent;
+
+                        console.log(extent);
+
+                        // build WCS URL
+                        const request = currentJSON.wcsParams.request;
+                        const version = currentJSON.wcsParams.version;
+                        const coverage = currentJSON.wcsParams.coverageId;
+                        const format = currentJSON.wcsParams.format;
+                        const xySubset = `SUBSET=Lat(${extent.ymin},${extent.ymax})&SUBSET=Lon(${extent.xmin},${extent.xmax})`;
+                        const timeSubset = `SUBSET=ansi("2001-01-01T00:00:00.000Z","2002-01-01T00:00:00.000Z")` // TODO: hard coded for now
+
+                        const wcsUrl = `https://ows.rasdaman.org/rasdaman/ows?&SERVICE=WCS&VERSION=${version}&REQUEST=${request}&COVERAGEID=${coverage}&${timeSubset}&${xySubset}&FORMAT=${format}`;
+
+                        // submit WCS Request
+                        console.log("Fetching WCS Coverage:", wcsUrl);
+                        var xhr = new XMLHttpRequest();
+                        xhr.open('GET', wcsUrl, true);
+                        xhr.responseType = 'json';
+
+                        xhr.onload = function (event) {
+                            var wcsJSON = this.response;
+                            // handle WCS response
+                            if (wcsJSON) {
+                                const pixelValues = wcsJSON.flat(2);
+                                console.log(pixelValues);
+                                const maxValue = Math.max(...pixelValues);
+                                const minValue = Math.min(...pixelValues);
+                                const sum = pixelValues.reduce((acc, val) => acc + val, 0);
+                                const meanValue = sum / pixelValues.length;
+
+                                const prediction = (meanValue + (maxValue - meanValue) * 0.5);
+
+                                const newVitals = {
+                                    globalMin: minValue.toFixed(2),
+                                    globalMax: maxValue.toFixed(2),
+                                    globalAverage: meanValue.toFixed(2),
+                                    globalTrend: prediction.toFixed(2)
+                                }
+                                setVitals(newVitals);
+                            }
+                        };
+                        xhr.send();
+
+                    }
+                }, 10); // 10ms debounce, increase if needed
+            }
 
         });
     };

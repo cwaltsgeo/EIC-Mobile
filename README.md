@@ -47,14 +47,16 @@ The ```config.json``` file is a vital metadata file that points the application 
 
 | Property | Data Type | Description|
 |----------|----------|----------|
-| ```name```            | string    | Layer Name                                                |
-| ```description```     | string    | Layer Description                                         |
-| ```unit```            | string    | Unit of Measurement                                       |
-| ```video```           | string    | Video Service endpoint                                    |
-| ```service```         | string    | Image Service REST endpoint                               |
-| ```active```          | boolean   | Value determines what layer is visible                    |
-| ```vitals```          | dict      | A dictionary of summary statistics from the Image Service |
-| ```tour```            | list      | A list of stops for the layer's Guided Tour               |
+| ```name```            | string    | Layer Name                                                        |
+| ```description```     | string    | Layer Description                                                 |
+| ```unit```            | string    | Unit of Measurement                                               |
+| ```video```           | string    | Video Service endpoint                                            |
+| ```service```         | string    | Image Service REST endpoint                                       |
+| ```wcs```             | boolean   | Value determines if service is or is not OGC WCS                  |
+| ```wcsParams```       | dict      | A dictionary of required parameters to request an OGC WCS service |
+| ```active```          | boolean   | Value determines what layer is or is not visible                  |
+| ```vitals```          | dict      | A dictionary of summary statistics from the Image Service         |
+| ```tour```            | list      | A list of stops for the layer's Guided Tour                       |
 
 ## Deployment
 

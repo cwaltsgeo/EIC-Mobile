@@ -5,6 +5,7 @@
         "unit": "ppb",
         "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC01_stage4_GMAO_pm25_2048x1024_en.mp4",
         "service": "https://civsci.esrigc.com/image/rest/services/MERRA2_NOX/ImageServer",
+        "wcs": false,
         "active": false,
         "vitals": {
             "globalMin": 0,
@@ -31,6 +32,7 @@
         "unit": "ppb",
         "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC03_stage4_GMAO_CO_2048x1024_en.mp4",
         "service": "https://civsci.esrigc.com/image/rest/services/MERRA2_NOX/ImageServer",
+        "wcs": false,
         "active": false,
         "vitals": {
             "globalMin": 0,
@@ -72,11 +74,18 @@
         ]
     },
     {
-        "name": "Nitrogen Oxides",
+        "name": "Nitrogen Oxides - OGC WCS",
         "description": "Air Quality",
-        "unit": "ppb",
+        "unit": "Celsius",
         "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC04_stage4_GMAO_NO2_2048x1024_en.mp4",
-        "service": "https://civsci.esrigc.com/image/rest/services/MERRA2_NOX/ImageServer",
+        "service": "https://ows.rasdaman.org/rasdaman/ows",
+        "wcs": true,
+        "wcsParams": {
+            "coverageId": "AvgLandTemp",
+            "request": "GetCoverage",
+            "version": "2.0.1",
+            "format": "application/json"
+        },
         "active": true,
         "vitals": {
             "globalMin": 0,

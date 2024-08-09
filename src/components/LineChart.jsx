@@ -63,7 +63,7 @@ export default function Panel() {
                                 },
                                 snap: true,
                                 sync: {
-                                    enabled: true,   
+                                    enabled: true,
                                     group: 1,
                                     suppressTooltips: false
                                 },
@@ -90,26 +90,72 @@ export default function Panel() {
     const queryPixels = (event) => {
         console.log('Querying Pixels');
 
-        const params = new ImageIdentifyParameters({
-            geometry: event.mapPoint,
-            processAsMultidimensional: true,
-            returnPixelValues: true,
-            returnCatalogItems: false,
-            returnGeometry: false,
-        });
+        if (!currentJSON.wcs) {
+            console.log('...from Image Service');
+            const point = mapView.toMap({ x: event.x, y: event.y });
+            console.log("Clicked at:", point.latitude, point.longitude);
+            const params = new ImageIdentifyParameters({
+                geometry: event.mapPoint,
+                processAsMultidimensional: true,
+                returnPixelValues: true,
+                returnCatalogItems: false,
+                returnGeometry: false,
+            });
 
-        imageService.identify(currentJSON.service, params).then((results) => {
-            var pixelValues = []
+            imageService.identify(currentJSON.service, params).then((results) => {
+                var pixelValues = []
+                var timeStamps = []
+
+                if (results.value) {
+                    results.value.split('; ').map(Number).map(i => pixelValues.push(i));
+                    results.properties.Attributes.map(i => timeStamps.push(i.StdTime));
+                    //timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { year: 'numeric', month: 'numeric', day: 'numeric' }));
+                    timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric', hour: 'numeric' }));
+
+                    setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
+                }
+            });
+        } else {
+            console.log('...from WCS');
+            const point = mapView.toMap({ x: event.x, y: event.y });
+            console.log("Clicked at:", point.latitude, point.longitude);
+            
             var timeStamps = []
 
-            if (results.value) {
-                results.value.split('; ').map(Number).map(i => pixelValues.push(i));
-                results.properties.Attributes.map(i => timeStamps.push(i.StdTime));
-                //timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { year: 'numeric', month: 'numeric', day: 'numeric' }));
-                timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric', hour: 'numeric' }));
+            // build WCS URL
+            const request = currentJSON.wcsParams.request;
+            const version = currentJSON.wcsParams.version;
+            const coverage = currentJSON.wcsParams.coverageId;
+            const format = currentJSON.wcsParams.format;
+            const xySubset = `SUBSET=Lat(${point.latitude},${point.latitude})&SUBSET=Lon(${point.longitude},${point.longitude})`
+            const timeSubset = `SUBSET=ansi("2001-01-01T00:00:00.000Z","2002-01-01T00:00:00.000Z")` // TODO: hard coded for now
+            const wcsTimestamps = ["2001-01-01T00:00:00.000Z", "2001-02-01T00:00:00.000Z", "2001-03-01T00:00:00.000Z", "2001-04-01T00:00:00.000Z", "2001-05-01T00:00:00.000Z", "2001-06-01T00:00:00.000Z", "2001-07-01T00:00:00.000Z", "2001-08-01T00:00:00.000Z", "2001-09-01T00:00:00.000Z", "2001-10-01T00:00:00.000Z", "2001-11-01T00:00:00.000Z", "2001-12-01T00:00:00.000Z", "2002-01-01T00:00:00.000Z"] // TODO: hard coded for now
+            
+            const wcsUrl = `https://ows.rasdaman.org/rasdaman/ows?&SERVICE=WCS&VERSION=${version}&REQUEST=${request}&COVERAGEID=${coverage}&${timeSubset}&${xySubset}&FORMAT=${format}`;
+            
+            // submit WCS Request
+            console.log("Fetching WCS Coverage:", wcsUrl);
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', wcsUrl, true);
+            xhr.responseType = 'json';
+    
+            xhr.onload = function (e) {
+              var wcsJSON = this.response;
+              // handle WCS response
+              if (wcsJSON) {
+                // Format time stamps
+                timeStamps = wcsTimestamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric' }));
+
+                // double-flatten the array
+                const pixelValues = wcsJSON.flat().flat();
+
                 setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
-            }
-        });
+              }
+            };
+            xhr.send();
+    
+        }
+
     };
 
     // Add onClick event listener to the map view when the chart panel is selected
@@ -119,7 +165,7 @@ export default function Panel() {
             mapView.addHandles(mapView.on('click', queryPixels));
             setClickHandle(true);
         };
-    // Remove the onClick event listener when the chart panel is deselecteds
+        // Remove the onClick event listener when the chart panel is deselecteds
     } else if ((vitalSelection && !chartSelection) || (!chartSelection)) {
         if (clickHandle) {
             console.log('Removing handles');

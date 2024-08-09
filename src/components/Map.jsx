@@ -94,8 +94,6 @@ export default function Home() {
 
     view.on('click', (event) => {
 
-      console.log(event.mapPoint.longitude, event.mapPoint.latitude)
-
       const point = new Point({
         longitude: event.mapPoint.longitude,
         latitude: event.mapPoint.latitude,
