@@ -97,7 +97,8 @@ aws s3 sync ./dist s3://<your-bucket-name>/
 
 ## Authors
 
-* **Cole Walts** - *Developer* - [cwaltsgeo](https://github.com/cwaltsgeo)
+* **Alex Gurvich** - [agurvich](https://github.com/agurvich)
+* **Cole Walts** - [cwaltsgeo](https://github.com/cwaltsgeo)
 
 ## License
 
