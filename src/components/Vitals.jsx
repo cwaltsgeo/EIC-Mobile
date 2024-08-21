@@ -2,6 +2,7 @@ import { useRef, useContext, useEffect, useState } from 'react';
 
 import Sketch from '@arcgis/core/widgets/Sketch';
 import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
+import MosaicRule from "@arcgis/core/layers/support/MosaicRule.js";
 import TimeExtent from '@arcgis/core/TimeExtent';
 import ImageHistogramParameters from '@arcgis/core/rest/support/ImageHistogramParameters';
 import * as imageService from '@arcgis/core/rest/imageService.js';
@@ -10,7 +11,6 @@ import { MapViewContext, VitalSelectionContext, CurrentJSONContext } from '../co
 
 // Vitals component to display the selected layer's summary statistics
 export default function Vitals() {
-
     const { mapView } = useContext(MapViewContext);
     const { currentJSON } = useContext(CurrentJSONContext);
     const { vitalSelection } = useContext(VitalSelectionContext);
@@ -48,9 +48,21 @@ export default function Vitals() {
 
         // Time extent for the statistics
         const timeExtent = new TimeExtent({
-            start: new Date(Date.UTC(2020, 1, 1)),
-            end: new Date(Date.UTC(2030, 1, 1))
+            start: new Date(currentJSON.datetimeRange?.[0] || Date.UTC(2020, 1, 1)),
+            end: new Date(currentJSON.datetimeRange?.[1] || Date.UTC(2030, 1, 1))
         });
+        console.log(timeExtent)
+
+        let params = {};
+        if (currentJSON.variable) {
+            params = {
+                ...params,
+                mosaicRule: new MosaicRule({
+                    multidimensionalDefinition: [{variableName: currentJSON.variable}]
+                }),
+            }
+        }
+
 
         // Update summary statistics when user moves the sketch, 10ms debounce
         sketch.on('update', event => {
@@ -63,14 +75,15 @@ export default function Vitals() {
                     if (event.state === 'active' && event.graphics.length > 0) {
                         const graphic = event.graphics[0];
                         const extent = graphic.geometry.extent;
-
-                        const params = new ImageHistogramParameters({
+                        
+                        const imageHistogramParams = new ImageHistogramParameters({
+                            ...params,
                             geometry: extent,
                             timeExtent: timeExtent
                         });
 
                         // request for histograms and statistics for the specified parameters
-                        imageService.computeStatisticsHistograms(currentJSON.service, params).then(function (results) {
+                        imageService.computeStatisticsHistograms(currentJSON.service, imageHistogramParams).then(function (results) {
                             if (results.statistics && results.statistics[0]) {
                                 const prediction = (results.statistics[0].mean - results.statistics[0].median) * 0.5 + results.statistics[0].mean;
                                 const newVitals = {
