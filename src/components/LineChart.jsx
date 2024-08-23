@@ -1,6 +1,8 @@
 import { useContext, useState, useEffect, useRef } from 'react';
 
 import ImageIdentifyParameters from '@arcgis/core/rest/support/ImageIdentifyParameters';
+import MosaicRule from "@arcgis/core/layers/support/MosaicRule.js";
+import TimeExtent from "@arcgis/core/TimeExtent.js";
 import * as imageService from '@arcgis/core/rest/imageService.js';
 
 import Chart from 'chart.js/auto';
@@ -94,15 +96,33 @@ export default function Panel() {
             console.log('...from Image Service');
             const point = mapView.toMap({ x: event.x, y: event.y });
             console.log("Clicked at:", point.latitude, point.longitude);
-            const params = new ImageIdentifyParameters({
+            let params = {
                 geometry: event.mapPoint,
                 processAsMultidimensional: true,
+                returnFirstValueOnly: false,
+                timeExtent: new TimeExtent({
+                    start: new Date(currentJSON.datetimeRange?.[0] || Date.UTC(2020, 1, 1)),
+                    end: new Date(currentJSON.datetimeRange?.[1] || Date.UTC(2030, 1, 1))
+                }),
                 returnPixelValues: true,
                 returnCatalogItems: false,
                 returnGeometry: false,
-            });
+            };
 
-            imageService.identify(currentJSON.service, params).then((results) => {
+            if (currentJSON.variable) {
+                params = {
+                    ...params,
+                    mosaicRule: new MosaicRule({
+                        multidimensionalDefinition: [{variableName: currentJSON.variable}]
+                    }),
+                }
+            }
+
+            const imageIdentifyParams = new ImageIdentifyParameters(params);
+
+            console.log("querying statistics")
+            imageService.identify(currentJSON.service, imageIdentifyParams).then((results) => {
+                console.log(results)
                 var pixelValues = []
                 var timeStamps = []
 
