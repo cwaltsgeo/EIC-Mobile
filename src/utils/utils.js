@@ -51,7 +51,7 @@ export const handleImageServiceRequest = async (event, currentJSON, setChartData
     }
 
     const point = event.mapPoint;
-    const buffer = 0.1;
+    const buffer = 0.9;
 
     const extent = new Extent({
         xmin: point.x - buffer,
