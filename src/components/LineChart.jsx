@@ -91,6 +91,7 @@ export default function Panel() {
                 chartInstanceRef.current.destroy();
                 chartInstanceRef.current = null;
             }
+
         };
     }, [chartData, currentJSON]);
 

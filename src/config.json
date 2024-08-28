@@ -32,6 +32,7 @@
         "unit": "ppb",
         "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC03_stage4_GMAO_CO_2048x1024_en.mp4",
         "service": "https://civsci.esrigc.com/image/rest/services/MERRA2_NOX/ImageServer",
+        "datetimeRange": ["2020-01-01", "2050-12-31"],
         "wcs": false,
         "active": false,
         "vitals": {
@@ -79,6 +80,7 @@
         "unit": "Celsius",
         "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC04_stage4_GMAO_NO2_2048x1024_en.mp4",
         "service": "https://ows.rasdaman.org/rasdaman/ows",
+        "datetimeRange": ["2020-01-01", "2050-12-31"],
         "wcs": true,
         "wcsParams": {
             "coverageId": "AvgLandTemp",
@@ -103,6 +105,35 @@
                     "delay": 10000
                 },
                 "text": "Nitrogen Oxides have a short lifespan and are concentrated near the sources that emitted them. They are visible in the animation near urban areas, power plants, and shipping lanes. Here in the Indian Ocean, we can clearly see the Nitrogen Oxide pollution from the shipping industry in the region."
+            }
+        ]
+    },
+    {
+        "name": "Days above 90 degrees",
+        "description": "Temperature",
+        "unit": "degree-day",
+        "video": "/tmax-90.mp4",
+        "service": "https://gis.earthdata.nasa.gov/UAT/rest/services/NEX-GDDP-CMIP6/tmaxXF_ACCESS_CM2_ssp126/ImageServer/",
+        "variable": "tmax_above_90",
+        "datetimeRange": ["2020-01-01", "2050-12-31"],
+        "wcs": false,
+        "active": true,
+        "vitals": {
+            "globalMin": 0,
+            "globalMax": 0.68,
+            "globalAverage": 0.07,
+            "globalTrend": 0.09
+        },
+        "tour": [
+            {
+                "stop": 0,
+                "location": {
+                    "latitude": -10,
+                    "longitude": 83,
+                    "zoom": 2,
+                    "delay": 10000
+                },
+                "text": "Lorem Ipsum"
             }
         ]
     }
