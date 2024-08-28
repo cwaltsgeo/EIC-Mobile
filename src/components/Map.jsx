@@ -10,14 +10,10 @@ import VideoElement from '@arcgis/core/layers/support/VideoElement';
 import SceneView from '@arcgis/core/views/SceneView';
 import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
-import TimeExtent from '@arcgis/core/TimeExtent';
-import ImageIdentifyParameters from '@arcgis/core/rest/support/ImageIdentifyParameters';
-import ImageHistogramParameters from '@arcgis/core/rest/support/ImageHistogramParameters';
-import MosaicRule from '@arcgis/core/layers/support/MosaicRule';
-import * as imageService from "@arcgis/core/rest/imageService.js";
 import { ChartDataContext, CurrentJSONContext, MapViewContext } from '../contexts/AppContext';
 import { VitalsDataContext } from '../contexts/AppContext';
 import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync';
+import { handleImageServiceRequest, handleWCSRequest } from '../utils/utils';
 
 export default function Home() {
   const mapDiv = useRef(null);
@@ -217,110 +213,10 @@ export default function Home() {
   }, [setMapView]);
 
   const handleMapClick = async (event) => {
-    const timeExtent = new TimeExtent({
-        start: new Date(currentJSON.datetimeRange?.[0] || Date.UTC(2020, 1, 1)),
-        end: new Date(currentJSON.datetimeRange?.[1] || Date.UTC(2030, 1, 1))
-    });
-
     if (!currentJSON.wcs) {
-        console.log('...from image service');
-        let params = {
-            geometry: event.mapPoint,
-            processAsMultidimensional: true,
-            returnFirstValueOnly: false,
-            timeExtent: new TimeExtent({
-                start: new Date(currentJSON.datetimeRange?.[0] || Date.UTC(2020, 1, 1)),
-                end: new Date(currentJSON.datetimeRange?.[1] || Date.UTC(2030, 1, 1))
-            }),
-            returnPixelValues: true,
-            returnCatalogItems: false,
-            returnGeometry: false,
-        };
-
-        if (currentJSON.variable) {
-            params = {
-                ...params,
-                mosaicRule: new MosaicRule({
-                    multidimensionalDefinition: [{variableName: currentJSON.variable}]
-                }),
-            }
-        }
-
-        const imageIdentifyParams = new ImageIdentifyParameters(params);
-
-        imageService.identify(currentJSON.service, imageIdentifyParams).then((results) => {
-            var pixelValues = []
-            var timeStamps = []
-
-            if (results.value) {
-                results.value.split('; ').map(Number).map(i => pixelValues.push(i));
-                results.properties.Attributes.map(i => timeStamps.push(i.StdTime));
-                timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric', hour: 'numeric' }));
-
-                setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
-            }
-        });
-
-        const imageHistogramParams = new ImageHistogramParameters({
-            ...params,
-            geometry: event.mapPoint.extent,
-            timeExtent: timeExtent
-        });
-
-        imageService.computeStatisticsHistograms(currentJSON.service, imageHistogramParams)
-        .then((results) => {
-          if (results.statistics && results.statistics[0]) {
-            const newVitals = {
-              globalMax: results.statistics[0].max.toFixed(2),
-              globalAverage: results.statistics[0].mean.toFixed(2),
-            };
-            setVitalsData(newVitals);
-          } else {
-            setVitalsData({ globalMax: '-', globalAverage: '-' });
-          }
-        })
-        .catch((err) => {
-          console.log('Error fetching image service statistics:', err);
-        });
+      await handleImageServiceRequest(event, currentJSON, setChartData, setVitalsData);
     } else {
-        console.log('...from WCS');
-        const point = mapView.toMap({ x: event.x, y: event.y });
-        console.log("Clicked at:", point.latitude, point.longitude);
-
-        const wcsTimestamps = ["2001-01-01T00:00:00.000Z", "2001-02-01T00:00:00.000Z", "2001-03-01T00:00:00.000Z", "2001-04-01T00:00:00.000Z", "2001-05-01T00:00:00.000Z", "2001-06-01T00:00:00.000Z", "2001-07-01T00:00:00.000Z", "2001-08-01T00:00:00.000Z", "2001-09-01T00:00:00.000Z", "2001-10-01T00:00:00.000Z", "2001-11-01T00:00:00.000Z", "2001-12-01T00:00:00.000Z", "2002-01-01T00:00:00.000Z"] // TODO: hard coded for now
-
-        const request = currentJSON.wcsParams.request;
-        const version = currentJSON.wcsParams.version;
-        const coverage = currentJSON.wcsParams.coverageId;
-        const format = currentJSON.wcsParams.format;
-        const xySubset = `SUBSET=Lat(${event.mapPoint.extent.ymin},${event.mapPoint.extent.ymax})&SUBSET=Lon(${event.mapPoint.extent.xmin},${event.mapPoint.extent.xmax})`;
-        const timeSubset = `SUBSET=ansi("2001-01-01T00:00:00.000Z","2002-01-01T00:00:00.000Z")`; // TODO: hard coded for now
-
-        const wcsUrl = `https://ows.rasdaman.org/rasdaman/ows?&SERVICE=WCS&VERSION=${version}&REQUEST=${request}&COVERAGEID=${coverage}&${timeSubset}&${xySubset}&FORMAT=${format}`;
-
-        fetch(wcsUrl)
-          .then(response => response.json())
-          .then(wcsJSON => {
-            if (wcsJSON) {
-              const timeStamps = wcsTimestamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric' }));
-
-              const pixelValues = wcsJSON.flat().flat();
-
-              setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
-
-              const maxValue = Math.max(...pixelValues);
-              const meanValue = pixelValues.reduce((acc, val) => acc + val, 0) / pixelValues.length;
-              const newVitals = {
-                globalMax: maxValue.toFixed(2),
-                globalAverage: meanValue.toFixed(2),
-              };
-
-              setVitalsData(newVitals);
-            }
-          })
-          .catch(error => {
-            console.error('Error fetching WCS Coverage:', error);
-          });
+      await handleWCSRequest(event, mapView, currentJSON, setChartData, setVitalsData);
     }
   };
 
