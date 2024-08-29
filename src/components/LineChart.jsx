@@ -47,12 +47,16 @@ export default function Panel() {
                         scales: {
                             x: {
                                 ticks: {
+                                    color: 'white',
                                     autoSkip: true,
                                     maxRotation: 0,
                                     minRotation: 0,
                                 },
                             },
                             y: {
+                                ticks: {
+                                    color: 'white',
+                                },
                                 beginAtZero: true
                             }
                         },

@@ -6,48 +6,52 @@ import MosaicRule from '@arcgis/core/layers/support/MosaicRule';
 import Extent from '@arcgis/core/geometry/Extent';
 
 export const handleImageServiceRequest = async (event, currentJSON, setChartData, setVitalsData) => {
-  let params = {
-    geometry: event.mapPoint,
-    processAsMultidimensional: true,
-    returnFirstValueOnly: false,
-    timeExtent: new TimeExtent({
-        start: new Date(currentJSON.datetimeRange?.[0] || Date.UTC(2020, 1, 1)),
-        end: new Date(currentJSON.datetimeRange?.[1] || Date.UTC(2030, 1, 1))
-    }),
-    returnPixelValues: true,
-    returnCatalogItems: false,
-    returnGeometry: false,
-  };
+    let params = {
+      geometry: event.mapPoint,
+      processAsMultidimensional: true,
+      returnFirstValueOnly: false,
+      timeExtent: new TimeExtent({
+          start: new Date(currentJSON.datetimeRange?.[0] || Date.UTC(2020, 1, 1)),
+          end: new Date(currentJSON.datetimeRange?.[1] || Date.UTC(2030, 1, 1))
+      }),
+      returnPixelValues: true,
+      returnCatalogItems: false,
+      returnGeometry: false,
+    };
 
-  if (currentJSON.variable) {
-    params = {
-        ...params,
-        mosaicRule: new MosaicRule({
-            multidimensionalDefinition: [{variableName: currentJSON.variable}]
-        }),
+    if (currentJSON.variable) {
+      params = {
+          ...params,
+          mosaicRule: new MosaicRule({
+              multidimensionalDefinition: [{variableName: currentJSON.variable}]
+          }),
+      }
     }
-  }
 
-  const imageIdentifyParams = new ImageIdentifyParameters(params);
+    const imageIdentifyParams = new ImageIdentifyParameters(params);
 
-  try {
-    let timeStamps = [];
-    let pixelValues = [];
-    const results = await imageService.identify(currentJSON.service, imageIdentifyParams);
+    try {
+      const results = await imageService.identify(currentJSON.service, imageIdentifyParams);
 
-    if (results.value) {
-        pixelValues = results.value.split(';').map(value => parseFloat(value.trim()));
-        results.properties.Attributes.forEach(attribute => {
-            const timestamp = attribute.StdTime;
+      const timeStamps = results.properties.Attributes.map(attribute => {
+        const timestamp = attribute.StdTime;
+        const date = new Date(timestamp);
 
-            const date = new Date(timestamp);
+        return !isNaN(date.getTime())
+            ? date.toLocaleString('en-us', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: false })
+            : undefined;
+      });
 
-            if (!isNaN(date.getTime())) {
-              timeStamps.push(date.toLocaleString('en-us', { month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }));
-            }
-          });
 
-        setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
+      if (results.value) {
+        const pixelValues = results.value.split(';').map(value => parseFloat(value.trim()));
+
+        const chartData = pixelValues.map((y, i) => ({
+            x: timeStamps[i],
+            y
+        }));
+
+        setChartData(chartData);
     }
 
     const point = event.mapPoint;
@@ -89,7 +93,6 @@ export const handleImageServiceRequest = async (event, currentJSON, setChartData
 
 export const handleWCSRequest = async (event, mapView, currentJSON, setChartData, setVitalsData) => {
   const point = mapView.toMap({ x: event.x, y: event.y });
-  console.log("Clicked at:", point.latitude, point.longitude);
 
   const wcsTimestamps = ["2001-01-01T00:00:00.000Z", "2001-02-01T00:00:00.000Z", "2001-03-01T00:00:00.000Z", "2001-04-01T00:00:00.000Z", "2001-05-01T00:00:00.000Z", "2001-06-01T00:00:00.000Z", "2001-07-01T00:00:00.000Z", "2001-08-01T00:00:00.000Z", "2001-09-01T00:00:00.000Z", "2001-10-01T00:00:00.000Z", "2001-11-01T00:00:00.000Z", "2001-12-01T00:00:00.000Z", "2002-01-01T00:00:00.000Z"]
 

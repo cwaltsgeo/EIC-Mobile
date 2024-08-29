@@ -56,7 +56,7 @@ export default function Panel() {
 
     return (
         <div className='fixed bottom-0 left-1/2 transform -translate-x-1/2 shadow-lg backdrop-blur-lg z-10 flex
-                        w-full top-[430px] gap-[20px] lg:w-[762px] lg:top-[746px] lg:left-1/2 lg:-translate-x-1/2 lg:gap-[60px]'>
+                        w-full gap-[20px] lg:w-[762px] lg:left-1/2 lg:-translate-x-1/2 lg:gap-[60px]'>
             <TabGroup style={{ width: '100%', height: '100%'}} defaultIndex={selectedIndex} onChange={setSelectedIndex}>
                 <StyledTabList className="absolute left-1/2 transform -translate-x-1/2 -top-16 text-white p-2 flex space-x-4 overflow-x-auto whitespace-nowrap">
                     {config.map((dataset, index) => (
