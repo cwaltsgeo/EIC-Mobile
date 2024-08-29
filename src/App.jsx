@@ -7,7 +7,7 @@ import { VitalsDataContext, MapViewContext, ChartDataContext, CurrentJSONContext
 
 export default function App() {
   const [mapView, setMapView] = useState(null);
-  const [currentJSON, setCurrentJSON] = useState(config[3]);
+  const [currentJSON, setCurrentJSON] = useState(config[0]);
   const [chartData, setChartData] = useState([]);
   const [ vitalsData, setVitalsData ] = useState({ globalAverage: 'N/A', globalMax: 'N/A' }, );
   const [dataSelection, setDataSelection] = useState([false, 0]);
