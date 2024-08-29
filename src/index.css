@@ -18,6 +18,8 @@
 }
 
 * {
+    font-family: "Manrope", sans-serif;
+
     &::-webkit-scrollbar {
         display: none;
       }

@@ -7,20 +7,22 @@ export default function Vitals() {
     const globalMax = vitalsData?.globalMax ?? 'N/A';
 
     return (
-        <div className=''>
-            <div className='flex justify-between min-h-100'>
-                <div className='text-center'>
-                    <p className='text-sm font-medium tracking-widest text-white lg:text-base'>
-                        Average value
-                    </p>
-                    <h6 className='text-4xl lg:text-5xl'>{globalAverage}</h6>
-                </div>
-                <div className='text-center'>
-                    <p className='text-sm font-medium tracking-widest text-white lg:text-base'>
-                        Maximum value
-                    </p>
-                    <h6 className='text-4xl lg:text-5xl'>{globalMax}</h6>
-                </div>
+        <div className="flex justify-between min-h-[80px] w-[327px] px-8 lg:min-h-[67px] lg:px-4">
+            <div className='text-center'>
+                <p className='text-[14px] font-light leading-[19.12px] lg:text-[12px] lg:leading-[16.39px]'>
+                    Average value
+                </p>
+                <h6 className='text-[36px] font-light leading-[48px] tracking-[-0.03em] lg:text-[48px] lg:leading-[64px]'>
+                    {globalAverage}
+                </h6>
+            </div>
+            <div className='text-center'>
+                <p className='text-[14px] font-light leading-[19.12px] lg:text-[12px] lg:leading-[16.39px]'>
+                    Maximum value
+                </p>
+                <h6 className='text-[36px] font-light leading-[48px] tracking-[-0.03em] lg:text-[48px] lg:leading-[64px]'>
+                    {globalMax}
+                </h6>
             </div>
         </div>
     );

@@ -126,8 +126,6 @@ export default function Home() {
         bufferGraphic.geometry = buffer;
         bufferGraphic.attributes = { name: 'Geodesic-Buffer' };
       }
-
-      console.log('Buffer updated at point:', point, 'with buffer:', buffer);
     };
 
     let lastKnownPoint;

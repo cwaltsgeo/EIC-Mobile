@@ -34,25 +34,26 @@ export default function Panel() {
         setDataSelection([false, 0]);
 
         mapView.map.layers.forEach(layer => {
-          if (layer.title !== item.name && layer.title !== null && layer.title !== 'Geodesic-Buffer') {
-            layer.visible = false;
-          }
+            if (layer.title !== item.name && layer.title !== null && layer.title !== 'Geodesic-Buffer') {
+                layer.visible = false;
+            }
         });
 
         const layer = mapView.map.layers.find(layer => layer.title === item.name);
 
         if (layer) {
-          layer.visible = !layer.visible;
-          const currentProduct = config.find(product => product.name === layer.title);
-          setCurrentJSON(currentProduct);
+            layer.visible = !layer.visible;
+            const currentProduct = config.find(product => product.name === layer.title);
+            setCurrentJSON(currentProduct);
         }
 
         setSelectedIndex(index);
     };
 
     return (
-        <div className='fixed bottom-0 left-1/2 transform -translate-x-1/2 h-[400px] w-full max-w-6xl bg-opacity-90 rounded-xl shadow-lg backdrop-blur-lg flex-col z-10 p-6'>
-            <TabGroup defaultIndex={selectedIndex} onChange={setSelectedIndex}>
+        <div className='fixed bottom-0 left-1/2 transform -translate-x-1/2 shadow-lg backdrop-blur-lg z-10 flex
+                        w-full top-[430px] gap-[20px] lg:w-[762px] lg:top-[746px] lg:left-1/2 lg:-translate-x-1/2 lg:gap-[60px]'>
+            <TabGroup style={{ width: '100%', height: '100%'}} defaultIndex={selectedIndex} onChange={setSelectedIndex}>
                 <StyledTabList className="absolute left-1/2 transform -translate-x-1/2 -top-16 text-white p-2 flex space-x-4 overflow-x-auto whitespace-nowrap">
                     {config.map((dataset, index) => (
                         <Tab
@@ -69,11 +70,10 @@ export default function Panel() {
                     ))}
                 </StyledTabList>
 
-                <TabPanels>
+                <TabPanels style={{ height: '100%'}}>
                     {config.map((dataset, index) => (
-                        <TabPanel key={index}>
-                            <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 h-[400px] bg-black w-full max-w-6xl bg-opacity-70 rounded-xl shadow-lg backdrop-blur-lg flex z-10 p-6
-                            flex-col md:flex-row">
+                        <TabPanel style={{ height: '100%'}} key={index}>
+                            <div className="flex flex-col justify-between md:flex-row w-full h-full rounded-t-xl bg-black bg-opacity-70 shadow-lg backdrop-blur-lg p-6 gap-[20px] lg:gap-[60px]">
                                 {/* Data on the left */}
                                 <div className="w-full md:w-1/2 pr-4 overflow-y-auto text-white">
                                     <Data />

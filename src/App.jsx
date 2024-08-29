@@ -2,6 +2,7 @@ import { useState } from 'react';
 import config from './config.json';
 import Map from './components/Map';
 import Panel from './components/Panel';
+import EICLogo from './components/Logo';
 import { VitalsDataContext, MapViewContext, ChartDataContext, CurrentJSONContext, DataSelectionContext } from './contexts/AppContext';
 
 export default function App() {
@@ -17,6 +18,7 @@ export default function App() {
         <DataSelectionContext.Provider value={{ dataSelection, setDataSelection }}>
           <VitalsDataContext.Provider value={{ vitalsData, setVitalsData }}>
             <ChartDataContext.Provider value={{ chartData, setChartData }}>
+              <EICLogo />
               <Panel />
               <Map />
             </ChartDataContext.Provider>
