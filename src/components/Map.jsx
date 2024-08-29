@@ -99,8 +99,8 @@ export default function Home() {
     };
 
     const initializeLayers = () => {
-      const pointLayer = new GraphicsLayer();
-      const bufferLayer = new GraphicsLayer();
+      const pointLayer = new GraphicsLayer({ title: 'Geodesic-Point' });
+      const bufferLayer = new GraphicsLayer({ title: 'Geodesic-Buffer' });
       map.addMany([pointLayer, bufferLayer]);
 
       return { bufferLayer, pointLayer };

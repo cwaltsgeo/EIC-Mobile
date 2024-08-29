@@ -34,21 +34,25 @@ export default function Panel() {
         setDataSelection([false, 0]);
 
         mapView.map.layers.forEach(layer => {
-            if (layer.title !== item.name && layer.title !== null && layer.title !== 'Geodesic-Buffer') {
+            if (layer.title !== item.name && layer.title !== 'Geodesic-Buffer' && layer.title !== 'Geodesic-Point') {
                 layer.visible = false;
+            } else if (layer.title === item.name) {
+                layer.visible = true;
             }
         });
 
         const layer = mapView.map.layers.find(layer => layer.title === item.name);
 
         if (layer) {
-            layer.visible = !layer.visible;
+            layer.visible = true;
+
             const currentProduct = config.find(product => product.name === layer.title);
             setCurrentJSON(currentProduct);
         }
 
         setSelectedIndex(index);
     };
+
 
     return (
         <div className='fixed bottom-0 left-1/2 transform -translate-x-1/2 shadow-lg backdrop-blur-lg z-10 flex
