@@ -23,6 +23,12 @@ export default function Home() {
   const { setMapView } = useContext(MapViewContext);
   const { setVitalsData} = useContext(VitalsDataContext);
 
+  const currentJSONRef = useRef(currentJSON);
+
+  useEffect(() => {
+    currentJSONRef.current = currentJSON;
+  }, [currentJSON]);
+
   useEffect(() => {
     let layerList = [];
     config.forEach(layer => {
@@ -212,9 +218,9 @@ export default function Home() {
 
   const handleMapClick = async (event) => {
     if (!currentJSON.wcs) {
-      await handleImageServiceRequest(event, currentJSON, setChartData, setVitalsData);
+      await handleImageServiceRequest(event, currentJSONRef.current, setChartData, setVitalsData);
     } else {
-      await handleWCSRequest(event, mapView, currentJSON, setChartData, setVitalsData);
+      await handleWCSRequest(event, mapView, currentJSONRef.current, setChartData, setVitalsData);
     }
   };
 

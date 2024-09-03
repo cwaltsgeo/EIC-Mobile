@@ -6,6 +6,7 @@ import MosaicRule from '@arcgis/core/layers/support/MosaicRule';
 import Extent from '@arcgis/core/geometry/Extent';
 
 export const handleImageServiceRequest = async (event, currentJSON, setChartData, setVitalsData) => {
+
     let params = {
       geometry: event.mapPoint,
       processAsMultidimensional: true,

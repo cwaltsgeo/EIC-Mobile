@@ -10,7 +10,7 @@ export default function Vitals() {
         <div className="flex justify-between min-h-[80px] w-[327px] px-0 lg:min-h-[67px] lg:px-4">
             <div className='text-center'>
                 <p className='text-[14px] font-light leading-[19.12px] lg:text-[12px] lg:leading-[16.39px]'>
-                    Average value (ppb)
+                    Average value
                 </p>
                 <h6 className='text-[36px] font-light leading-[48px] tracking-[-0.03em] lg:text-[48px] lg:leading-[64px]'>
                     {globalAverage}
@@ -18,7 +18,7 @@ export default function Vitals() {
             </div>
             <div className='text-center'>
                 <p className='text-[14px] font-light leading-[19.12px] lg:text-[12px] lg:leading-[16.39px]'>
-                    Maximum value (ppb)
+                    Maximum value
                 </p>
                 <h6 className='text-[36px] font-light leading-[48px] tracking-[-0.03em] lg:text-[48px] lg:leading-[64px]'>
                     {globalMax}

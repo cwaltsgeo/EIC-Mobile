@@ -3,7 +3,7 @@ import Vitals from './Vitals';
 import Data from './Data';
 import LineChart from './LineChart';
 import { Tab, TabGroup, TabList, TabPanels, TabPanel } from '@headlessui/react';
-import { useContext, useState } from 'react';
+import { useContext, useState, useEffect } from 'react';
 import config from '../config.json';
 import { DataSelectionContext, MapViewContext, CurrentJSONContext } from '../contexts/AppContext';
 
@@ -53,6 +53,12 @@ export default function Panel() {
         setSelectedIndex(index);
     };
 
+    useEffect(() => {
+        if (mapView) {
+            const initialLayer = config[0];
+            changeLayer(initialLayer, 0);
+        }
+    }, [mapView]);
 
     return (
         <div className='fixed bottom-0 left-1/2 transform -translate-x-1/2 shadow-lg backdrop-blur-lg z-10 flex
