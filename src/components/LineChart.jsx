@@ -1,15 +1,14 @@
-import { useContext, useEffect, useRef } from 'react';
-
+import { useContext, useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import crosshairPlugin from 'chartjs-plugin-crosshair';
-
 import { ChartDataContext, CurrentJSONContext } from '../contexts/AppContext';
 
-export default function Panel() {
+export default function Panel({ selectedIndex }) {
     const { chartData } = useContext(ChartDataContext);
     const { currentJSON } = useContext(CurrentJSONContext);
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         if (chartRef.current && chartData.length > 0) {
@@ -17,29 +16,47 @@ export default function Panel() {
 
             if (chartInstanceRef.current) {
                 chartInstanceRef.current.destroy();
-                chartInstanceRef.current = null;
             }
 
             if (ctx) {
-                const gradient = ctx.createLinearGradient(0, 0, 0, 400);
-                gradient.addColorStop(0, 'rgba(54, 162, 235, 1)');
-                gradient.addColorStop(1, 'rgba(54, 162, 235, 0)');
-
                 chartInstanceRef.current = new Chart(ctx, {
                     type: 'line',
                     data: {
                         labels: chartData.map(data => data.x),
-                        datasets: [{
-                            label: currentJSON.unit,
-                            data: chartData.map(data => data.y),
-                            borderColor: 'steelblue',
-                            backgroundColor: gradient,
-                            fill: true,
-                            pointRadius: 0
-                        }],
+                        datasets: [
+                            {
+                                label: 'SSP126',
+                                data: chartData.map(data => data.heatmax_ssp126),
+                                borderColor: selectedIndex === 0 ? 'steelblue' : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 0 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'SSP245',
+                                data: chartData.map(data => data.heatmax_ssp245),
+                                borderColor: selectedIndex === 1 ? 'green' : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 1 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'SSP370',
+                                data: chartData.map(data => data.heatmax_ssp370),
+                                borderColor: selectedIndex === 2 ? 'red' : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 2 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            },
+                        ],
                     },
                     options: {
                         responsive: true,
+                        animation: false,
+                        maintainAspectRatio: false,
                         interaction: {
                             intersect: false,
                             mode: 'index',
@@ -48,17 +65,24 @@ export default function Panel() {
                             x: {
                                 ticks: {
                                     color: 'white',
-                                    autoSkip: true,
+                                    autoSkip: false,
                                     maxRotation: 0,
                                     minRotation: 0,
+                                    callback: function(value, index, values) {
+                                        const year = Number(this.getLabelForValue(value));
+                                        if (year % 25 === 0) {
+                                            return year;
+                                        }
+                                        return '';
+                                    }
                                 },
                             },
                             y: {
                                 ticks: {
                                     color: 'white',
                                 },
-                                beginAtZero: true
-                            }
+                                beginAtZero: false,
+                            },
                         },
                         plugins: {
                             legend: {
@@ -67,26 +91,27 @@ export default function Panel() {
                             crosshair: {
                                 line: {
                                     color: '#F66',
-                                    width: 1
+                                    width: 1,
                                 },
                                 snap: true,
                                 sync: {
                                     enabled: true,
                                     group: 1,
-                                    suppressTooltips: false
+                                    suppressTooltips: false,
                                 },
                                 callbacks: {
                                     beforeZoom: function (start, end) {
                                         return true;
                                     },
-                                    afterZoom: function (start, end) {
-                                    }
-                                }
-                            }
-                        }
+                                    afterZoom: function (start, end) {},
+                                },
+                            },
+                        },
                     },
-                    plugins: [crosshairPlugin]
+                    plugins: [crosshairPlugin],
                 });
+
+                setLoading(false);
             }
         }
 
@@ -95,13 +120,18 @@ export default function Panel() {
                 chartInstanceRef.current.destroy();
                 chartInstanceRef.current = null;
             }
-
         };
-    }, [chartData, currentJSON]);
+    }, [chartData, selectedIndex, currentJSON]);
 
     return (
-        <div style={{ width: '100%' }}>
-            <canvas ref={chartRef} style={{ width: '100%'}}></canvas>
+        <div style={{ width: 'calc(100% - 32px)', height: '200px', position: 'relative' }}>
+            <canvas ref={chartRef} style={{ width: '100%' }}></canvas>
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-full h-1/4 bg-neutral-950 bg-opacity-90 rounded-md animate-pulse"></div>
+                </div>
+            )}
         </div>
     );
+
 }

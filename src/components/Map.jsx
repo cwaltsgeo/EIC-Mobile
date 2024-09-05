@@ -1,3 +1,5 @@
+
+import Point from '@arcgis/core/geometry/Point';
 import { useContext, useEffect, useRef } from 'react';
 import Graphic from '@arcgis/core/Graphic';
 import config from '../config.json';
@@ -10,12 +12,14 @@ import VideoElement from '@arcgis/core/layers/support/VideoElement';
 import SceneView from '@arcgis/core/views/SceneView';
 import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
+import { VideoContext } from '../contexts/VideoContext';
 import { ChartDataContext, CurrentJSONContext, MapViewContext } from '../contexts/AppContext';
 import { VitalsDataContext } from '../contexts/AppContext';
 import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync';
-import { handleImageServiceRequest, handleWCSRequest } from '../utils/utils';
+import { handleImageServiceRequest } from '../utils/utils';
 
 export default function Home() {
+  const { videoElementRef } = useContext(VideoContext);
   const mapDiv = useRef(null);
   const { mapView } = useContext(MapViewContext);
   const { currentJSON } = useContext(CurrentJSONContext);
@@ -46,6 +50,8 @@ export default function Home() {
           })
         })
       });
+
+      videoElementRef.current = element;
 
       const mediaLayer = new MediaLayer({
         source: [element],
@@ -177,9 +183,25 @@ export default function Home() {
       }
     };
 
-    view.when(() => {
-      const initialCenterPoint = view.center.clone();
-      createBuffer(initialCenterPoint);
+    view.when(async () => {
+
+      // Adding a default point for Washington, DC. We'll try
+      // to make this more dynamic and to depend on the user location,
+      // but for now it's hardcoded.
+      const initialCenterPoint = new Point({
+        longitude: -77.0369,
+        latitude: 38.9072,
+        spatialReference: { wkid: 4326 }
+      });
+
+      await view.goTo({
+        center: [initialCenterPoint.longitude, initialCenterPoint.latitude],
+        zoom: 1,
+      });
+
+      await createBuffer(initialCenterPoint);
+
+      await handleMapClick({ mapPoint: initialCenterPoint });
 
       view.on("drag", (event) => {
         if (event.action === "start") {
@@ -219,8 +241,6 @@ export default function Home() {
   const handleMapClick = async (event) => {
     if (!currentJSON.wcs) {
       await handleImageServiceRequest(event, currentJSONRef.current, setChartData, setVitalsData);
-    } else {
-      await handleWCSRequest(event, mapView, currentJSONRef.current, setChartData, setVitalsData);
     }
   };
 

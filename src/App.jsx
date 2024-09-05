@@ -4,6 +4,7 @@ import Map from './components/Map';
 import Panel from './components/Panel';
 import EICLogo from './components/Logo';
 import { VitalsDataContext, MapViewContext, ChartDataContext, CurrentJSONContext, DataSelectionContext } from './contexts/AppContext';
+import { VideoProvider } from './contexts/VideoContext';
 
 export default function App() {
   const [mapView, setMapView] = useState(null);
@@ -18,9 +19,11 @@ export default function App() {
         <DataSelectionContext.Provider value={{ dataSelection, setDataSelection }}>
           <VitalsDataContext.Provider value={{ vitalsData, setVitalsData }}>
             <ChartDataContext.Provider value={{ chartData, setChartData }}>
-              <EICLogo />
-              <Panel />
-              <Map />
+              <VideoProvider>
+                <EICLogo />
+                <Panel />
+                <Map />
+              </VideoProvider>
             </ChartDataContext.Provider>
           </VitalsDataContext.Provider>
         </DataSelectionContext.Provider>
