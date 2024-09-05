@@ -30,8 +30,7 @@ export default function Panel({ selectedIndex }) {
                                 borderColor: selectedIndex === 0 ? 'steelblue' : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 0 ? 2 : 0.5,
                                 fill: false,
-                                pointRadius: 0,
-                                borderWidth: 1
+                                pointRadius: 0
                             },
                             {
                                 label: 'SSP245',
@@ -39,8 +38,7 @@ export default function Panel({ selectedIndex }) {
                                 borderColor: selectedIndex === 1 ? 'green' : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 1 ? 2 : 0.5,
                                 fill: false,
-                                pointRadius: 0,
-                                borderWidth: 1
+                                pointRadius: 0
                             },
                             {
                                 label: 'SSP370',
@@ -48,8 +46,7 @@ export default function Panel({ selectedIndex }) {
                                 borderColor: selectedIndex === 2 ? 'red' : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 2 ? 2 : 0.5,
                                 fill: false,
-                                pointRadius: 0,
-                                borderWidth: 1
+                                pointRadius: 0
                             },
                         ],
                     },
