@@ -18,4 +18,11 @@ module.exports = {
       { allowConstantExport: true },
     ],
   },
+  theme: {
+    extend: {
+      fontFamily: {
+        manrope: ['Manrope', 'sans-serif'],
+      },
+    },
+  },
 }

@@ -1,12 +1,14 @@
 [
     {
-        "name": "Particulate Matter 2.5",
-        "description": "Air Quality",
-        "unit": "ppb",
-        "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC01_stage4_GMAO_pm25_2048x1024_en.mp4",
-        "service": "https://civsci.esrigc.com/image/rest/services/MERRA2_NOX/ImageServer",
+        "name": "SSP126 Sustainability",
+        "description": "Heat Index",
+        "unit": "Heatmax",
+        "video": "/heatmax_126_12month.mp4",
+        "service":
+        "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
+        "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
         "wcs": false,
-        "active": false,
+        "active": true,
         "vitals": {
             "globalMin": 0,
             "globalMax": 0,
@@ -18,91 +20,69 @@
                 "stop": 0,
                 "location": {
                     "latitude": 0,
-                    "longitude": 25,
-                    "zoom": 1,
-                    "delay": 8000
-                },
-                "text": "This is the first stop on the CO tour"
-            }
-        ]
-    },
-    {
-        "name": "Carbon Monoxide",
-        "description": "Air Quality",
-        "unit": "ppb",
-        "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC03_stage4_GMAO_CO_2048x1024_en.mp4",
-        "service": "https://civsci.esrigc.com/image/rest/services/MERRA2_NOX/ImageServer",
-        "wcs": false,
-        "active": false,
-        "vitals": {
-            "globalMin": 0,
-            "globalMax": 0.79,
-            "globalAverage": 0.07,
-            "globalTrend": 0.13
-        },
-        "tour": [
-            {
-                "stop": 0,
-                "location": {
-                    "latitude": -25,
-                    "longitude": -55,
-                    "zoom": 2,
-                    "delay": 15000
-                },
-                "text": "Carbon Monoxide is produced when carbon-based fuels such as coal, wood, and oil are burned inneficiently. Cut-and-burn agriculture, industrial centers, and wildfires are all significant sources of Carbon Monoxide."
-            },
-            {
-                "stop": 1,
-                "location": {
-                    "latitude": 40,
-                    "longitude": -28,
-                    "zoom": 3,
-                    "delay": 15000
-                },
-                "text": "Carbon Monoxide is spread by winds and circulation patterns throughout the atmosphere. As seen here, Carbon Monoxide from the industrial Mid-Atlantic is being carried across the Atlantic Ocean to Europe."
-            },
-            {
-                "stop": 2,
-                "location": {
-                    "latitude": 40,
-                    "longitude": -118,
-                    "zoom": 4,
-                    "delay": 15000
-                },
-                "text": "Wildfires are also a significant source of Carbon Monoxide. The recent wildfires across the Pacific Northwest blot the region as the fire season makes its return."
-            }
-        ]
-    },
-    {
-        "name": "Nitrogen Oxides - OGC WCS",
-        "description": "Air Quality",
-        "unit": "Celsius",
-        "video": "https://cwalts-demos.s3.us-east-1.amazonaws.com/mediaLayers/videos/MC04_stage4_GMAO_NO2_2048x1024_en.mp4",
-        "service": "https://ows.rasdaman.org/rasdaman/ows",
-        "wcs": true,
-        "wcsParams": {
-            "coverageId": "AvgLandTemp",
-            "request": "GetCoverage",
-            "version": "2.0.1",
-            "format": "application/json"
-        },
-        "active": true,
-        "vitals": {
-            "globalMin": 0,
-            "globalMax": 0.68,
-            "globalAverage": 0.07,
-            "globalTrend": 0.09
-        },
-        "tour": [
-            {
-                "stop": 0,
-                "location": {
-                    "latitude": -10,
-                    "longitude": 83,
+                    "longitude": 0,
                     "zoom": 2,
                     "delay": 10000
                 },
-                "text": "Nitrogen Oxides have a short lifespan and are concentrated near the sources that emitted them. They are visible in the animation near urban areas, power plants, and shipping lanes. Here in the Indian Ocean, we can clearly see the Nitrogen Oxide pollution from the shipping industry in the region."
+                "text": "This tour demonstrates the global distribution of the Monthly Maximum Heat Index (Heatmax), highlighting the areas most affected by extreme heat."
+            }
+        ]
+    },
+    {
+        "name": "SSP245 Middle of the road",
+        "description": "Heat Index",
+        "unit": "Heatmax",
+        "video": "/heatmax_126_12month.mp4",
+        "service":
+        "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
+        "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
+        "wcs": false,
+        "active": true,
+        "vitals": {
+            "globalMin": 0,
+            "globalMax": 0,
+            "globalAverage": 0,
+            "globalTrend": 0
+        },
+        "tour": [
+            {
+                "stop": 0,
+                "location": {
+                    "latitude": 0,
+                    "longitude": 0,
+                    "zoom": 2,
+                    "delay": 10000
+                },
+                "text": "This tour demonstrates the global distribution of the Monthly Maximum Heat Index (Heatmax), highlighting the areas most affected by extreme heat."
+            }
+        ]
+    },
+    {
+        "name": "SSP370 Regional rivalry",
+        "description": "Heat Index",
+        "unit": "Heatmax",
+        "video": "/heatmax_126_12month.mp4",
+        "service":
+        "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
+        "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
+        "wcs": false,
+        "active": true,
+        "vitals": {
+            "globalMin": 0,
+            "globalMax": 0,
+            "globalAverage": 0,
+            "globalTrend": 0
+        },
+        "tour": [
+            {
+                "stop": 0,
+                "location": {
+                    "latitude": 0,
+                    "longitude": 0,
+                    "zoom": 2,
+                    "delay": 10000
+                },
+                "text": "This tour demonstrates the global distribution of the Monthly Maximum Heat Index (Heatmax), highlighting the areas most affected by extreme heat."
             }
         ]
     }

@@ -12,14 +12,17 @@
   "dependencies": {
     "@arcgis/core": "^4.30.9",
     "@headlessui/react": "^2.1.2",
-    "@heroicons/react": "^2.1.5",
     "chart.js": "^4.4.3",
+    "chartjs-adapter-date-fns": "^3.0.0",
     "chartjs-plugin-crosshair": "^2.0.0",
+    "date-fns": "^3.6.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "react-share": "^5.1.0"
+    "react-share": "^5.1.0",
+    "styled-components": "^6.1.12"
   },
   "devDependencies": {
+    "@heroicons/react": "^2.1.5",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.1",

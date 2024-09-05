@@ -1,32 +1,40 @@
+
+import Point from '@arcgis/core/geometry/Point';
 import { useContext, useEffect, useRef } from 'react';
-
+import Graphic from '@arcgis/core/Graphic';
 import config from '../config.json';
-
+import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
 import Map from '@arcgis/core/Map.js';
 import Extent from '@arcgis/core/geometry/Extent';
-import GraphicsLayer from '@arcgis/core/layers/GraphicsLayer';
-import Point from '@arcgis/core/geometry/Point';
-import Graphic from '@arcgis/core/Graphic';
-import WebStyleSymbol from '@arcgis/core/symbols/WebStyleSymbol.js';
-import SimpleFillSymbol from '@arcgis/core/symbols/SimpleFillSymbol';
-import SimpleRenderer from '@arcgis/core/renderers/SimpleRenderer';
 import MediaLayer from '@arcgis/core/layers/MediaLayer';
-import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import ExtentAndRotationGeoreference from '@arcgis/core/layers/support/ExtentAndRotationGeoreference';
 import VideoElement from '@arcgis/core/layers/support/VideoElement';
 import SceneView from '@arcgis/core/views/SceneView';
 import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
-
-import { MapViewContext } from '../contexts/AppContext';
+import { VideoContext } from '../contexts/VideoContext';
+import { ChartDataContext, CurrentJSONContext, MapViewContext } from '../contexts/AppContext';
+import { VitalsDataContext } from '../contexts/AppContext';
+import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync';
+import { handleImageServiceRequest } from '../utils/utils';
 
 export default function Home() {
-
+  const { videoElementRef } = useContext(VideoContext);
   const mapDiv = useRef(null);
+  const { mapView } = useContext(MapViewContext);
+  const { currentJSON } = useContext(CurrentJSONContext);
+  const { setChartData } = useContext(ChartDataContext);
   const { setMapView } = useContext(MapViewContext);
+  const { setVitalsData} = useContext(VitalsDataContext);
+
+  const currentJSONRef = useRef(currentJSON);
 
   useEffect(() => {
-    let layer_list = [];
+    currentJSONRef.current = currentJSON;
+  }, [currentJSON]);
+
+  useEffect(() => {
+    let layerList = [];
     config.forEach(layer => {
       const element = new VideoElement({
         video: layer.video,
@@ -43,30 +51,19 @@ export default function Home() {
         })
       });
 
+      videoElementRef.current = element;
+
       const mediaLayer = new MediaLayer({
         source: [element],
         title: layer.name,
         copyright: "NASA's Goddard Space Flight Center",
       });
 
-      layer_list.push(mediaLayer);
+      layerList.push(mediaLayer);
     });
-
-    const countryBoundaryLayer = new FeatureLayer({
-      url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer/0',
-      title: 'Country Boundaries',
-      popupEnabled: false,
-      renderer: new SimpleRenderer({
-        symbol: new SimpleFillSymbol({
-          color: 'rgba(0,76,115,0.04)'
-        })
-      })
-    });
-
-    layer_list.push(countryBoundaryLayer);
 
     const map = new Map({
-      layers: layer_list
+      layers: layerList
     });
 
     const view = new SceneView({
@@ -90,31 +87,142 @@ export default function Home() {
       }
     });
 
-    const graphicsLayer = new GraphicsLayer();
+    let draggingInsideBuffer = false;
+    let initialCamera;
 
-    view.on('click', (event) => {
+    const bufferSymbol = {
+      type: "simple-fill",
+      color: [5, 80, 216, 0.5],
+      outline: {
+        color: [2, 28, 75, 1],
+        width: 2,
+        style: 'dot'
+      }
+    };
 
-      const point = new Point({
-        longitude: event.mapPoint.longitude,
-        latitude: event.mapPoint.latitude,
+    const pointSymbol = {
+      type: "simple-marker",
+      color: [5, 80, 216, 0.5],
+      outline: {
+        color: [2, 28, 75, 1],
+        width: 1
+      },
+      size: 7
+    };
+
+    const initializeLayers = () => {
+      const pointLayer = new GraphicsLayer({ title: 'Geodesic-Point' });
+      const bufferLayer = new GraphicsLayer({ title: 'Geodesic-Buffer' });
+      map.addMany([pointLayer, bufferLayer]);
+
+      return { bufferLayer, pointLayer };
+    };
+
+
+    const { bufferLayer, pointLayer } = initializeLayers();
+
+    const createBuffer = async (point) => {
+      point.hasZ = false;
+      point.z = undefined;
+
+      const buffer = await geometryEngineAsync.geodesicBuffer(point, 560, 'kilometers');
+
+      if (pointLayer.graphics.length === 0) {
+        pointLayer.add(new Graphic({ geometry: point, symbol: pointSymbol, attributes: { name: 'Geodesic-Buffer' }   }));
+        bufferLayer.add(new Graphic({ geometry: buffer, symbol: bufferSymbol, attributes: { name: 'Geodesic-Buffer' }   }));
+      } else {
+        const pointGraphic = pointLayer.graphics.getItemAt(0);
+        pointGraphic.geometry = point;
+
+        const bufferGraphic = bufferLayer.graphics.getItemAt(0);
+        bufferGraphic.geometry = buffer;
+        bufferGraphic.attributes = { name: 'Geodesic-Buffer' };
+      }
+    };
+
+    let lastKnownPoint;
+
+    const handleDragStart = async (event) => {
+      const startPoint = view.toMap({ x: event.x, y: event.y });
+      const bufferGraphic = bufferLayer.graphics.getItemAt(0);
+
+      if (startPoint && bufferGraphic) {
+        const isWithinBuffer = await geometryEngineAsync.contains(bufferGraphic.geometry, startPoint);
+        draggingInsideBuffer = isWithinBuffer;
+
+        if (isWithinBuffer) {
+          event.stopPropagation();
+          initialCamera = view.camera.clone();
+        }
+      }
+    };
+
+    const handleDragMove = async (event) => {
+      if (draggingInsideBuffer) {
+        const updatedPoint = view.toMap({ x: event.x, y: event.y });
+
+        if (updatedPoint) {
+          event.stopPropagation();
+
+          await createBuffer(updatedPoint);
+
+          lastKnownPoint = updatedPoint;
+        }
+      }
+    };
+
+    const handleDragEnd = async () => {
+      if (draggingInsideBuffer) {
+        view.goTo(initialCamera, { animate: false });
+
+        if (lastKnownPoint) {
+          await handleMapClick({ mapPoint: lastKnownPoint });
+        }
+
+        draggingInsideBuffer = false;
+      }
+    };
+
+    view.when(async () => {
+
+      // Adding a default point for Washington, DC. We'll try
+      // to make this more dynamic and to depend on the user location,
+      // but for now it's hardcoded.
+      const initialCenterPoint = new Point({
+        longitude: -77.0369,
+        latitude: 38.9072,
+        spatialReference: { wkid: 4326 }
       });
 
-      const webStyleSymbol = new WebStyleSymbol({
-        name: 'Pushpin 3',
-        styleName: 'EsriIconsStyle'
+      await view.goTo({
+        center: [initialCenterPoint.longitude, initialCenterPoint.latitude],
+        zoom: 1,
       });
 
-      const graphic = new Graphic({
-        geometry: point,
-        symbol: webStyleSymbol
+      await createBuffer(initialCenterPoint);
+
+      await handleMapClick({ mapPoint: initialCenterPoint });
+
+      view.on("drag", (event) => {
+        if (event.action === "start") {
+          handleDragStart(event);
+        } else if (event.action === "update") {
+          handleDragMove(event);
+        } else if (event.action === "end") {
+          handleDragEnd();
+        }
       });
-      graphicsLayer.removeAll();
-      graphicsLayer.add(graphic);
-      view.map.add(graphicsLayer);
     });
 
     const searchWidget = new Search({
       view: view
+    });
+
+    view.when(() => {
+      view.ui.move("zoom", "top-right");
+      view.ui.move("compass", "top-right");
+      view.ui.move("navigation-toggle", "top-right");
+      view.ui.move("attribution", "bottom-right");
     });
 
     view.ui.add(searchWidget, {
@@ -128,11 +236,17 @@ export default function Home() {
         view.destroy();
       }
     }
-  }, []);
+  }, [setMapView]);
+
+  const handleMapClick = async (event) => {
+    if (!currentJSON.wcs) {
+      await handleImageServiceRequest(event, currentJSONRef.current, setChartData, setVitalsData);
+    }
+  };
 
   return (
     <div>
-      <div ref={mapDiv} style={{ height: '90vh', marginTop: '10vh' }}></div>
+      <div ref={mapDiv} style={{ height: '100vh' }}></div>
     </div>
   );
 }

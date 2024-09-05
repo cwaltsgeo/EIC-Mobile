@@ -5,16 +5,6 @@ export const MapViewContext = React.createContext({
   setMapView: () => {},
 });
 
-export const VitalSelectionContext = React.createContext({
-  vitalSelection: null,
-  setVitalSelection: () => {},
-});
-
-export const ChartSelectionContext = React.createContext({
-  chartSelection: null,
-  setChartSelection: () => {},
-});
-
 export const DataSelectionContext = React.createContext({
   dataSelection: null,
   setDataSelection: () => {},
@@ -23,4 +13,14 @@ export const DataSelectionContext = React.createContext({
 export const CurrentJSONContext = React.createContext({
   currentJSON: null,
   setCurrentJSON: () => {},
+});
+
+export const ChartDataContext = React.createContext({
+  chartData: null,
+  setChartData: () => {},
+});
+
+export const VitalsDataContext = React.createContext({
+  vitalsData: { globalAverage: 'N/A', globalMax: 'N/A' },
+  setVitalsData: () => {},
 });
