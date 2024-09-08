@@ -6,6 +6,7 @@ export const handleImageServiceRequest = async (event, currentJSON, setChartData
   url.searchParams.append("geometry", `${point.longitude},${point.latitude}`);
   url.searchParams.append("geometryType", "esriGeometryPoint");
   url.searchParams.append("returnFirstValueOnly", "false");
+  url.searchParams.append("interpolation", "nearest");
   url.searchParams.append("f", "json");
 
   const startDate = currentJSON.datetimeRange?.[0] || Date.UTC(1950, 0, 1);
