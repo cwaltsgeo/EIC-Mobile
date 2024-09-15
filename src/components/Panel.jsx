@@ -45,7 +45,7 @@ export default function Panel() {
         setDataSelection([false, 0]);
 
         mapView.map.layers.forEach(layer => {
-            if (layer.title !== item.name && layer.title !== 'Geodesic-Buffer' && layer.title !== 'Geodesic-Point') {
+            if (layer.title !== item.name && layer.title !== 'Geodesic-Buffer' && layer.title !== 'Geodesic-Point' && layer.title !== 'Country Boundaries') {
                 layer.visible = false;
             } else if (layer.title === item.name) {
                 layer.visible = true;

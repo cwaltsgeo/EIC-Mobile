@@ -12,6 +12,7 @@ import VideoElement from '@arcgis/core/layers/support/VideoElement';
 import SceneView from '@arcgis/core/views/SceneView';
 import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
+import FeatureLayer from '@arcgis/core/layers/FeatureLayer';
 import { VideoContext } from '../contexts/VideoContext';
 import { ChartDataContext, CurrentJSONContext, MapViewContext } from '../contexts/AppContext';
 import { VitalsDataContext } from '../contexts/AppContext';
@@ -60,8 +61,46 @@ export default function Home() {
       });
 
       layerList.push(mediaLayer);
+
+      // Add the vector layer
+      const vectorLayer = new FeatureLayer({
+        url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries_(Generalized)/FeatureServer',
+        title: 'Country Boundaries',
+        popupEnabled: false,
+        renderer: {
+          type: 'simple',
+          symbol: {
+            type: 'simple-fill',
+            color: 'rgba(0,76,115,0.04)',
+            outline: {
+              color: 'rgba(0,76,115,1)',
+              width: 1
+            }
+          }
+        },
+        labelingInfo: [
+          {
+            labelExpressionInfo: { expression: "$feature.COUNTRY" },
+            symbol: {
+              type: "text",
+              color: "black",
+              haloColor: "white",
+              haloSize: "1px",
+              font: {
+                size: "12px",
+                family: "Arial",
+                weight: "bold"
+              }
+            }
+          }
+        ]
+      });
+
+      layerList.push(vectorLayer);
+
     });
 
+    
     const map = new Map({
       layers: layerList
     });

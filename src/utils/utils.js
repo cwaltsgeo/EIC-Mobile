@@ -1,4 +1,3 @@
-
 export const handleImageServiceRequest = async (event, currentJSON, setChartData, setVitalsData) => {
   const point = event.mapPoint;
 
@@ -7,6 +6,7 @@ export const handleImageServiceRequest = async (event, currentJSON, setChartData
   url.searchParams.append("geometry", `${point.longitude},${point.latitude}`);
   url.searchParams.append("geometryType", "esriGeometryPoint");
   url.searchParams.append("returnFirstValueOnly", "false");
+  url.searchParams.append("interpolation", "nearest");
   url.searchParams.append("f", "json");
 
   const startDate = currentJSON.datetimeRange?.[0] || Date.UTC(1950, 0, 1);
@@ -18,31 +18,12 @@ export const handleImageServiceRequest = async (event, currentJSON, setChartData
     const results = await response.json();
 
     if (results.samples && results.samples.length > 0) {
-      const yearlyData = {};
-
-      results.samples.forEach(sample => {
-        const timestamp = sample.attributes.StdTime;
-        const date = new Date(timestamp);
-        const year = date.getUTCFullYear();
-
-        if (!yearlyData[year]) {
-          yearlyData[year] = {
-            heatmax_ssp126: parseFloat(sample.attributes.heatmax_ssp126),
-            heatmax_ssp245: parseFloat(sample.attributes.heatmax_ssp245),
-            heatmax_ssp370: parseFloat(sample.attributes.heatmax_ssp370)
-          };
-        } else {
-          yearlyData[year].heatmax_ssp126 = Math.max(yearlyData[year].heatmax_ssp126, parseFloat(sample.attributes.heatmax_ssp126));
-          yearlyData[year].heatmax_ssp245 = Math.max(yearlyData[year].heatmax_ssp245, parseFloat(sample.attributes.heatmax_ssp245));
-          yearlyData[year].heatmax_ssp370 = Math.max(yearlyData[year].heatmax_ssp370, parseFloat(sample.attributes.heatmax_ssp370));
-        }
-      });
-
-      const chartData = Object.keys(yearlyData).map(year => ({
-        x: year.toString(),
-        heatmax_ssp126: yearlyData[year].heatmax_ssp126,
-        heatmax_ssp245: yearlyData[year].heatmax_ssp245,
-        heatmax_ssp370: yearlyData[year].heatmax_ssp370
+      const chartData = results.samples.map(sample => ({
+        x: new Date(sample.attributes.StdTime).getUTCFullYear().toString(),
+        heatmax_ssp126: parseFloat(sample.attributes.heatmax_ssp126),
+        heatmax_ssp245: parseFloat(sample.attributes.heatmax_ssp245),
+        heatmax_ssp370: parseFloat(sample.attributes.heatmax_ssp370),
+        heatmax_ssp585: parseFloat(sample.attributes.heatmax_ssp585)
       }));
 
       setChartData(chartData);
