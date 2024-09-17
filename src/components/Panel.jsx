@@ -64,22 +64,34 @@ export default function Panel() {
         setIsPlaying(!isPlaying);
     };
 
+    // Forward 10 years (to be adjusted based on the final datasets)
     const handleForward = () => {
         const video = videoRefs.current[selectedVariableIndex];
-        const totalDuration = video.duration;
-        const stepSize = totalDuration / 150;
-        const newFrame = Math.min(currentFrame + stepSize, totalDuration);
+        const totalFrames = video.duration * 12;
+        const stepSize = 120;
+
+        const newFrame =
+            currentFrame + stepSize >= totalFrames
+                ? (currentFrame + stepSize) % totalFrames
+                : currentFrame + stepSize;
+
         setCurrentFrame(newFrame);
-        video.currentTime = newFrame;
+        video.currentTime = newFrame / 12;
     };
 
+    // Backward 10 years (to be adjusted based on the final datasets)
     const handleBackward = () => {
         const video = videoRefs.current[selectedVariableIndex];
-        const totalDuration = video.duration;
-        const stepSize = totalDuration / 150;
-        const newFrame = Math.max(currentFrame - stepSize, 0);
+        const totalFrames = video.duration * 12;
+        const stepSize = 120;
+
+        const newFrame =
+            currentFrame - stepSize < 0
+                ? totalFrames + (currentFrame - stepSize)
+                : currentFrame - stepSize;
+
         setCurrentFrame(newFrame);
-        video.currentTime = newFrame;
+        video.currentTime = newFrame / 12;
     };
 
     const changeDataset = (datasetIndex) => {
