@@ -4,7 +4,7 @@
             "datasetName": "Max Temperature",
             "variables": [
                 {
-                    "name": "4 FPS",
+                    "name": "SSP126",
                     "description": "Heat Index",
                     "variable": "heatmax_ssp126",
                     "unit": "Heatmax",
@@ -34,7 +34,7 @@
                     ]
                 },
                 {
-                    "name": "12 FPS",
+                    "name": "SSP245",
                     "description": "Heat Index",
                     "unit": "Heatmax",
                     "variable": "heatmax_ssp245",
@@ -64,7 +64,7 @@
                     ]
                 },
                 {
-                    "name": "12 FPS (g1 crf 18)",
+                    "name": "SSP370",
                     "description": "Heat Index",
                     "unit": "Heatmax",
                     "variable": "heatmax_ssp370",
@@ -94,7 +94,7 @@
                     ]
                 },
                 {
-                    "name": "12 FPS (g1 crf 10)",
+                    "name": "SSP585",
                     "description": "Heat Index",
                     "unit": "Heatmax",
                     "video": "/test-videos/composited_12fps_g15_crf18.mp4",
@@ -125,10 +125,10 @@
             ]
         },
         {
-            "datasetName": "Precipitation",
+            "datasetName": "Precipitation (TBD)",
             "variables": [
                 {
-                    "name": "4 FPS",
+                    "name": "TBD",
                     "description": "Heat Index",
                     "unit": "Heatmax",
                     "variable": "heatmax_ssp126",

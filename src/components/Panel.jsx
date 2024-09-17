@@ -113,11 +113,16 @@ export default function Panel() {
         setDataSelection([selectedDataset, selectedVariable]);
 
         mapView.map.layers.forEach((layer) => {
-            layer.visible =
+            if (
                 layer.title === selectedVariable.name ||
                 layer.title === 'World Countries' ||
                 layer.title === 'Geodesic-Buffer' ||
-                layer.title === 'Geodesic-Point';
+                layer.title === 'Geodesic-Point'
+            ) {
+                layer.visible = true;
+            } else {
+                layer.visible = false;
+            }
         });
     };
 

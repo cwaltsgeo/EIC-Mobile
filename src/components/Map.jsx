@@ -49,39 +49,40 @@ export default function Home() {
                         width: 1
                     }
                 }
-            }
+            },
+            interactive: false,
+            popupEnabled: false
         });
 
         config.datasets.forEach((dataset) => {
-            if (dataset === config.datasets[0]) {
-                dataset.variables.forEach((variable, index) => {
-                    const element = new VideoElement({
-                        video: variable.video,
-                        georeference: new ExtentAndRotationGeoreference({
-                            extent: new Extent({
-                                xmin: -180,
-                                ymin: -90,
-                                xmax: 180,
-                                ymax: 90
-                            })
+            dataset.variables.forEach((variable, index) => {
+                const element = new VideoElement({
+                    video: variable.video,
+                    georeference: new ExtentAndRotationGeoreference({
+                        extent: new Extent({
+                            xmin: -180,
+                            ymin: -90,
+                            xmax: 180,
+                            ymax: 90
                         })
-                    });
-
-                    const mediaLayer = new MediaLayer({
-                        source: [element],
-                        title: variable.name,
-                        copyright: "NASA's Goddard Space Flight Center"
-                    });
-
-                    layerList.push(mediaLayer);
-                    element.when(() => {
-                        const videoElement = element.content;
-                        videoRefs.current[index] = videoElement;
-
-                        videoElement.currentTime = currentFrame;
-                    });
+                    })
                 });
-            }
+
+                const mediaLayer = new MediaLayer({
+                    source: [element],
+                    title: variable.name,
+                    copyright: "NASA's Goddard Space Flight Center"
+                });
+
+                layerList.push(mediaLayer);
+
+                element.when(() => {
+                    const videoElement = element.content;
+                    videoRefs.current[index] = videoElement;
+
+                    videoElement.currentTime = currentFrame / 12;
+                });
+            });
         });
 
         layerList.push(worldCountriesLayer);
