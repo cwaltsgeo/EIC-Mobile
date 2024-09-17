@@ -49,10 +49,17 @@ export default function Panel() {
     const handlePlayPause = () => {
         if (isPlaying) {
             setCurrentFrame(
-                videoRefs.current[selectedVariableIndex].currentTime
+                videoRefs.current[selectedVariableIndex].currentTime * 12
             );
+            videoRefs.current.forEach((video) => {
+                video.pause();
+            });
         } else {
-            videoRefs.current[selectedVariableIndex].currentTime = currentFrame;
+            videoRefs.current[selectedVariableIndex].currentTime =
+                currentFrame / 12;
+            videoRefs.current.forEach((video) => {
+                video.play();
+            });
         }
         setIsPlaying(!isPlaying);
     };
