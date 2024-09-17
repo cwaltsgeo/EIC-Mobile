@@ -98,6 +98,7 @@
                     "description": "Heat Index",
                     "unit": "Heatmax",
                     "video": "/test-videos/composited_12fps_g15_crf18.mp4",
+                    "variable": "heatmax_ssp585",
                     "service":
                     "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
                     "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],

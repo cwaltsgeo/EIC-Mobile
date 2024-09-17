@@ -62,6 +62,20 @@ export default function Panel({ selectedIndex }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 2
+                                        ? 'orange'
+                                        : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 2 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'SSP585',
+                                data: chartData.map(
+                                    (data) => data.heatmax_ssp585
+                                ),
+                                borderColor:
+                                    selectedIndex === 3
                                         ? 'red'
                                         : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 2 ? 2 : 0.5,

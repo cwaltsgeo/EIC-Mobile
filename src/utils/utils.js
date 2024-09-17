@@ -23,6 +23,7 @@ export const handleImageServiceRequest = async (event, variable, setChartData, s
           heatmax_ssp126: (baseTemp + Math.random() * 5).toFixed(2),
           heatmax_ssp245: (baseTemp + Math.random() * 7 + 2).toFixed(2),
           heatmax_ssp370: (baseTemp + Math.random() * 10 + 5).toFixed(2),
+          heatmax_ssp585: (baseTemp + Math.random() * 15 + 10).toFixed(2),
         },
       };
     }),
@@ -45,12 +46,14 @@ export const handleImageServiceRequest = async (event, variable, setChartData, s
           yearlyData[year] = {
             heatmax_ssp126: parseFloat(sample.attributes.heatmax_ssp126),
             heatmax_ssp245: parseFloat(sample.attributes.heatmax_ssp245),
-            heatmax_ssp370: parseFloat(sample.attributes.heatmax_ssp370)
+            heatmax_ssp370: parseFloat(sample.attributes.heatmax_ssp370),
+            heatmax_ssp585: parseFloat(sample.attributes.heatmax_ssp585),
           };
         } else {
           yearlyData[year].heatmax_ssp126 = Math.max(yearlyData[year].heatmax_ssp126, parseFloat(sample.attributes.heatmax_ssp126));
           yearlyData[year].heatmax_ssp245 = Math.max(yearlyData[year].heatmax_ssp245, parseFloat(sample.attributes.heatmax_ssp245));
           yearlyData[year].heatmax_ssp370 = Math.max(yearlyData[year].heatmax_ssp370, parseFloat(sample.attributes.heatmax_ssp370));
+          yearlyData[year].heatmax_ssp585 = Math.max(yearlyData[year].heatmax_ssp585, parseFloat(sample.attributes.heatmax_ssp585));
         }
       });
 
@@ -58,7 +61,8 @@ export const handleImageServiceRequest = async (event, variable, setChartData, s
         x: year.toString(),
         heatmax_ssp126: yearlyData[year].heatmax_ssp126,
         heatmax_ssp245: yearlyData[year].heatmax_ssp245,
-        heatmax_ssp370: yearlyData[year].heatmax_ssp370
+        heatmax_ssp370: yearlyData[year].heatmax_ssp370,
+        heatmax_ssp585: yearlyData[year].heatmax_ssp585,
       }));
 
       setChartData(chartData);
