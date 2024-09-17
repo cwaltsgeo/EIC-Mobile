@@ -261,7 +261,7 @@ export default function Panel() {
                     <div className="w-full border-t border-gray-500"></div>
 
                     {/* Chart */}
-                    <div className="w-full h-[190px] md:h-[250px] flex items-start overflow-x-auto md:overflow-visible">
+                    <div className="w-full h-[220px] md:h-[250px] flex items-start overflow-x-auto md:overflow-visible">
                         <div className="flex items-center mr-4">
                             <span className="text-white text-lg mr-2">°C</span>
 
