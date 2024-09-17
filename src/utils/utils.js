@@ -11,7 +11,8 @@ export const handleImageServiceRequest = async (event, variable, setChartData, s
 
   const startDate = variable.datetimeRange?.[0] || Date.UTC(1950, 0, 1);
   const endDate = variable.datetimeRange?.[1] || Date.UTC(2100, 0, 31);
-  url.searchParams.append("time", `${new Date(startDate).toISOString()},${new Date(endDate).toISOString()}`);
+  url.searchParams.append("dimensionalName", `${new Date(startDate).toISOString()},${new Date(endDate).toISOString()}`);
+  url.searchParams.append("interpolation", "RSP_NearestNeighbor");
 
   const mockData = {
     samples: Array.from({ length: 150 }, (_, i) => {
