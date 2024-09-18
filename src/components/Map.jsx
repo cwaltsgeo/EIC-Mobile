@@ -16,43 +16,136 @@ import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
 import { VideoContext } from '../contexts/VideoContext';
 import { ChartDataContext, MapViewContext } from '../contexts/AppContext';
-import { VitalsDataContext } from '../contexts/AppContext';
 import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync';
 import { handleImageServiceRequest } from '../utils/utils';
+import { FPS, FRAME_DURATION, TOTAL_FRAMES } from '../utils/constants';
+
+const bufferSymbol = {
+    type: 'simple-fill',
+    color: [5, 80, 216, 0.5],
+    outline: { color: [2, 28, 75, 1], width: 2, style: 'dot' }
+};
+
+const pointSymbol = {
+    type: 'simple-marker',
+    color: [5, 80, 216, 0.5],
+    outline: { color: [2, 28, 75, 1], width: 1 },
+    size: 7
+};
+
+const createFeatureLayer = (url) =>
+    new FeatureLayer({
+        url,
+        opacity: 1,
+        outFields: ['*'],
+        renderer: {
+            type: 'simple',
+            symbol: {
+                type: 'simple-fill',
+                color: [200, 200, 200, 0.1],
+                outline: { color: [255, 255, 255, 0.5], width: 1 }
+            }
+        },
+        interactive: false,
+        popupEnabled: false
+    });
+
+const initializeLayers = (map) => {
+    const pointLayer = new GraphicsLayer({ title: 'Geodesic-Point' });
+    const bufferLayer = new GraphicsLayer({ title: 'Geodesic-Buffer' });
+    map.addMany([pointLayer, bufferLayer]);
+
+    return { bufferLayer, pointLayer };
+};
+
+const createBuffer = async (point, pointLayer, bufferLayer) => {
+    const buffer = await geometryEngineAsync.geodesicBuffer(
+        point,
+        560,
+        'kilometers'
+    );
+
+    if (!pointLayer.graphics.length) {
+        pointLayer.add(new Graphic({ geometry: point, symbol: pointSymbol }));
+        bufferLayer.add(
+            new Graphic({ geometry: buffer, symbol: bufferSymbol })
+        );
+    } else {
+        pointLayer.graphics.getItemAt(0).geometry = point;
+        bufferLayer.graphics.getItemAt(0).geometry = buffer;
+    }
+};
 
 export default function Home() {
-    const { videoRefs, currentFrame, setCurrentFrame, isPlaying } =
-        useContext(VideoContext);
+    const {
+        videoRefs,
+        currentFrame,
+        setCurrentFrame,
+        setIsPlaying,
+        isPlaying
+    } = useContext(VideoContext);
     const { mapView, setMapView } = useContext(MapViewContext);
     const { setChartData } = useContext(ChartDataContext);
-    const { setVitalsData } = useContext(VitalsDataContext);
     const { dataSelection } = useContext(DataSelectionContext);
 
     const mapDiv = useRef(null);
+
+    let draggingInsideBuffer = false;
+    let initialCamera;
+    let lastKnownPoint;
+
+    const handleDragStart = async (event, view, bufferLayer) => {
+        const startPoint = view.toMap({ x: event.x, y: event.y });
+        const bufferGraphic = bufferLayer.graphics.getItemAt(0);
+
+        if (startPoint && bufferGraphic) {
+            const isWithinBuffer = await geometryEngineAsync.contains(
+                bufferGraphic.geometry,
+                startPoint
+            );
+            draggingInsideBuffer = isWithinBuffer;
+
+            if (isWithinBuffer) {
+                event.stopPropagation();
+                initialCamera = view.camera.clone();
+            }
+        }
+    };
+
+    const handleDragMove = async (event, view, bufferLayer, pointLayer) => {
+        if (draggingInsideBuffer) {
+            const updatedPoint = view.toMap({ x: event.x, y: event.y });
+
+            if (updatedPoint) {
+                event.stopPropagation();
+                await createBuffer(updatedPoint, pointLayer, bufferLayer);
+                lastKnownPoint = updatedPoint;
+            }
+        }
+    };
+
+    const handleDragEnd = async (view) => {
+        if (draggingInsideBuffer) {
+            view.goTo(initialCamera, { animate: false });
+
+            if (lastKnownPoint) {
+                await handleMapClick({ mapPoint: lastKnownPoint });
+            }
+
+            draggingInsideBuffer = false;
+        }
+    };
 
     useEffect(() => {
         if (mapView) return;
 
         let layerList = [];
 
-        const worldCountriesLayer = new FeatureLayer({
-            url: 'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries/FeatureServer/0',
-            opacity: 1,
-            outFields: ['*'],
-            renderer: {
-                type: 'simple',
-                symbol: {
-                    type: 'simple-fill',
-                    color: [200, 200, 200, 0.1],
-                    outline: {
-                        color: [255, 255, 255, 0.5],
-                        width: 1
-                    }
-                }
-            },
-            interactive: false,
-            popupEnabled: false
-        });
+        const worldCountriesLayer = createFeatureLayer(
+            'https://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/World_Countries/FeatureServer/0'
+        );
+
+        let videoIndex = 0;
 
         config.datasets.forEach((dataset) => {
             dataset.variables.forEach((variable, index) => {
@@ -70,17 +163,51 @@ export default function Home() {
 
                 const mediaLayer = new MediaLayer({
                     source: [element],
-                    title: variable.name,
-                    copyright: "NASA's Goddard Space Flight Center"
+                    title: variable.name
                 });
 
                 layerList.push(mediaLayer);
 
+                mediaLayer.opacity = variable.name === 'SSP126' ? 1 : 0;
+
+                console.log(
+                    `Initializing video for: ${variable.name}`,
+                    variable.video
+                );
+
                 element.when(() => {
                     const videoElement = element.content;
-                    videoRefs.current[index] = videoElement;
+                    videoRefs.current[videoIndex] = videoElement;
 
-                    videoElement.currentTime = currentFrame / 12;
+                    videoElement.addEventListener('loadedmetadata', () => {
+                        videoElement.currentTime = currentFrame / FPS;
+
+                        // I was getting "DOMException - The play() request was interrupted"
+                        // when trying to pause the video as a default. This is a workaround to avoid
+                        // the issue. See suggestions:
+                        // https://developers.google.com/web/updates/2017/06/play-request-was-interrupted
+                        const playPromise = videoElement.play();
+
+                        if (playPromise !== undefined) {
+                            playPromise
+                                .then(() => {
+                                    if (!videoElement.paused) {
+                                        console.log(
+                                            `Video ${videoIndex} is playing`
+                                        );
+                                        videoElement.pause();
+                                    }
+                                })
+                                .catch((error) => {
+                                    console.error(
+                                        `Error playing video ${videoIndex}:`,
+                                        error
+                                    );
+                                });
+                        }
+                    });
+
+                    videoIndex++;
                 });
             });
         });
@@ -112,116 +239,7 @@ export default function Home() {
             }
         });
 
-        let draggingInsideBuffer = false;
-        let initialCamera;
-        let lastKnownPoint;
-
-        const bufferSymbol = {
-            type: 'simple-fill',
-            color: [5, 80, 216, 0.5],
-            outline: {
-                color: [2, 28, 75, 1],
-                width: 2,
-                style: 'dot'
-            }
-        };
-
-        const pointSymbol = {
-            type: 'simple-marker',
-            color: [5, 80, 216, 0.5],
-            outline: {
-                color: [2, 28, 75, 1],
-                width: 1
-            },
-            size: 7
-        };
-
-        const initializeLayers = () => {
-            const pointLayer = new GraphicsLayer({ title: 'Geodesic-Point' });
-            const bufferLayer = new GraphicsLayer({ title: 'Geodesic-Buffer' });
-            map.addMany([pointLayer, bufferLayer]);
-
-            return { bufferLayer, pointLayer };
-        };
-
-        const { bufferLayer, pointLayer } = initializeLayers();
-
-        const createBuffer = async (point) => {
-            point.hasZ = false;
-            point.z = undefined;
-
-            const buffer = await geometryEngineAsync.geodesicBuffer(
-                point,
-                560,
-                'kilometers'
-            );
-
-            if (pointLayer.graphics.length === 0) {
-                pointLayer.add(
-                    new Graphic({
-                        geometry: point,
-                        symbol: pointSymbol,
-                        attributes: { name: 'Geodesic-Buffer' }
-                    })
-                );
-                bufferLayer.add(
-                    new Graphic({
-                        geometry: buffer,
-                        symbol: bufferSymbol,
-                        attributes: { name: 'Geodesic-Buffer' }
-                    })
-                );
-            } else {
-                const pointGraphic = pointLayer.graphics.getItemAt(0);
-                pointGraphic.geometry = point;
-
-                const bufferGraphic = bufferLayer.graphics.getItemAt(0);
-                bufferGraphic.geometry = buffer;
-                bufferGraphic.attributes = { name: 'Geodesic-Buffer' };
-            }
-        };
-
-        const handleDragStart = async (event) => {
-            const startPoint = view.toMap({ x: event.x, y: event.y });
-            const bufferGraphic = bufferLayer.graphics.getItemAt(0);
-
-            if (startPoint && bufferGraphic) {
-                const isWithinBuffer = await geometryEngineAsync.contains(
-                    bufferGraphic.geometry,
-                    startPoint
-                );
-                draggingInsideBuffer = isWithinBuffer;
-
-                if (isWithinBuffer) {
-                    event.stopPropagation();
-                    initialCamera = view.camera.clone();
-                }
-            }
-        };
-
-        const handleDragMove = async (event) => {
-            if (draggingInsideBuffer) {
-                const updatedPoint = view.toMap({ x: event.x, y: event.y });
-
-                if (updatedPoint) {
-                    event.stopPropagation();
-                    await createBuffer(updatedPoint);
-                    lastKnownPoint = updatedPoint;
-                }
-            }
-        };
-
-        const handleDragEnd = async () => {
-            if (draggingInsideBuffer) {
-                view.goTo(initialCamera, { animate: false });
-
-                if (lastKnownPoint) {
-                    await handleMapClick({ mapPoint: lastKnownPoint });
-                }
-
-                draggingInsideBuffer = false;
-            }
-        };
+        const { bufferLayer, pointLayer } = initializeLayers(map);
 
         view.when(async () => {
             const initialCenterPoint = new Point({
@@ -237,17 +255,16 @@ export default function Home() {
                 ],
                 zoom: 1
             });
-
-            await createBuffer(initialCenterPoint);
+            await createBuffer(initialCenterPoint, pointLayer, bufferLayer);
             await handleMapClick({ mapPoint: initialCenterPoint });
 
             view.on('drag', (event) => {
                 if (event.action === 'start') {
-                    handleDragStart(event);
+                    handleDragStart(event, view, bufferLayer);
                 } else if (event.action === 'update') {
-                    handleDragMove(event);
+                    handleDragMove(event, view, bufferLayer, pointLayer);
                 } else if (event.action === 'end') {
-                    handleDragEnd();
+                    handleDragEnd(view);
                 }
             });
         });
@@ -271,12 +288,7 @@ export default function Home() {
     const handleMapClick = async (event) => {
         const [_, selectedVariable] = dataSelection;
 
-        await handleImageServiceRequest(
-            event,
-            selectedVariable,
-            setChartData,
-            setVitalsData
-        );
+        await handleImageServiceRequest(event, selectedVariable, setChartData);
     };
 
     function isSeekable(videoElement, time) {
@@ -292,8 +304,8 @@ export default function Home() {
     }
 
     useEffect(() => {
-        const totalFrames = 1800;
-        const frameDuration = 1000 / 12;
+        const totalFrames = TOTAL_FRAMES;
+        const frameDuration = FRAME_DURATION;
         let lastFrameTime = 0;
         let animationFrameId;
 
@@ -306,8 +318,8 @@ export default function Home() {
 
             if (elapsed >= frameDuration) {
                 setCurrentFrame((prevFrame) => {
-                    const newFrame =
-                        prevFrame + Math.floor(elapsed / frameDuration);
+                    const framesToAdvance = Math.floor(elapsed / frameDuration);
+                    const newFrame = prevFrame + framesToAdvance;
 
                     if (newFrame >= totalFrames) {
                         videoRefs.current.forEach((videoElement) => {
@@ -315,20 +327,21 @@ export default function Home() {
                                 videoElement.currentTime = 0;
                             }
                         });
+                        lastFrameTime = timestamp;
                         return 0;
                     } else {
                         videoRefs.current.forEach((videoElement) => {
-                            if (videoElement) {
-                                if (isSeekable(videoElement, newFrame / 12)) {
-                                    videoElement.currentTime = newFrame / 12;
-                                }
+                            if (
+                                videoElement &&
+                                isSeekable(videoElement, newFrame / FPS)
+                            ) {
+                                videoElement.currentTime = newFrame / FPS;
                             }
                         });
+                        lastFrameTime += framesToAdvance * frameDuration;
                         return newFrame;
                     }
                 });
-
-                lastFrameTime = timestamp - (elapsed % frameDuration);
             }
 
             animationFrameId = requestAnimationFrame(playVideoManually);

@@ -14,8 +14,3 @@ export const ChartDataContext = React.createContext({
     chartData: null,
     setChartData: () => {}
 });
-
-export const VitalsDataContext = React.createContext({
-    vitalsData: { globalAverage: 'N/A', globalMax: 'N/A' },
-    setVitalsData: () => {}
-});

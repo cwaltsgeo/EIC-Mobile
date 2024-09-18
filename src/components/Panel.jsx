@@ -1,5 +1,5 @@
 import LineChart from './LineChart';
-import { useContext, useState, useMemo, useEffect } from 'react';
+import { useContext, useState, useMemo } from 'react';
 import config from '../config.json';
 import {
     DataSelectionContext,
@@ -14,6 +14,7 @@ import {
     ForwardIcon
 } from '@heroicons/react/24/outline';
 import { Switch } from '@headlessui/react';
+import { FPS, MANUAL_FORWARD_BACKWARD_STEP_SIZE } from '../utils/constants';
 
 export default function Panel() {
     const {
@@ -31,35 +32,14 @@ export default function Panel() {
     const [selectedDatasetIndex, setSelectedDatasetIndex] = useState(0);
     const [selectedVariableIndex, setSelectedVariableIndex] = useState(0);
 
-    useEffect(() => {
-        const defaultDataset = config.datasets[0];
-        const defaultVariable = defaultDataset.variables[0];
-
-        setDataSelection([defaultDataset, defaultVariable]);
-
-        mapView?.map?.layers.forEach((layer) => {
-            layer.visible =
-                layer.title === defaultVariable.name ||
-                layer.title === 'World Countries' ||
-                layer.title === 'Geodesic-Buffer' ||
-                layer.title === 'Geodesic-Point';
-        });
-    }, [mapView, setDataSelection]);
-
     const handlePlayPause = () => {
         if (isPlaying) {
             setCurrentFrame(
-                videoRefs.current[selectedVariableIndex].currentTime * 12
+                videoRefs.current[selectedVariableIndex].currentTime * FPS
             );
-            videoRefs.current.forEach((video) => {
-                video.pause();
-            });
         } else {
             videoRefs.current[selectedVariableIndex].currentTime =
-                currentFrame / 12;
-            videoRefs.current.forEach((video) => {
-                video.play();
-            });
+                currentFrame / FPS;
         }
         setIsPlaying(!isPlaying);
     };
@@ -67,8 +47,8 @@ export default function Panel() {
     // Forward 10 years (to be adjusted based on the final datasets)
     const handleForward = () => {
         const video = videoRefs.current[selectedVariableIndex];
-        const totalFrames = video.duration * 12;
-        const stepSize = 120;
+        const totalFrames = video.duration * FPS;
+        const stepSize = MANUAL_FORWARD_BACKWARD_STEP_SIZE;
 
         const newFrame =
             currentFrame + stepSize >= totalFrames
@@ -76,14 +56,14 @@ export default function Panel() {
                 : currentFrame + stepSize;
 
         setCurrentFrame(newFrame);
-        video.currentTime = newFrame / 12;
+        video.currentTime = newFrame / FPS;
     };
 
     // Backward 10 years (to be adjusted based on the final datasets)
     const handleBackward = () => {
         const video = videoRefs.current[selectedVariableIndex];
-        const totalFrames = video.duration * 12;
-        const stepSize = 120;
+        const totalFrames = video.duration * FPS;
+        const stepSize = MANUAL_FORWARD_BACKWARD_STEP_SIZE;
 
         const newFrame =
             currentFrame - stepSize < 0
@@ -91,7 +71,7 @@ export default function Panel() {
                 : currentFrame - stepSize;
 
         setCurrentFrame(newFrame);
-        video.currentTime = newFrame / 12;
+        video.currentTime = newFrame / FPS;
     };
 
     const changeDataset = (datasetIndex) => {
@@ -119,9 +99,9 @@ export default function Panel() {
                 layer.title === 'Geodesic-Buffer' ||
                 layer.title === 'Geodesic-Point'
             ) {
-                layer.visible = true;
+                layer.opacity = 1;
             } else {
-                layer.visible = false;
+                layer.opacity = 0;
             }
         });
     };
@@ -147,7 +127,6 @@ export default function Panel() {
     }, [chartData, selectedDatasetIndex, selectedVariableIndex]);
 
     const selectedDataset = config.datasets[selectedDatasetIndex];
-    const selectedVariable = selectedDataset.variables[selectedVariableIndex];
 
     return (
         <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 shadow-lg z-10 flex w-full lg:w-[762px]">

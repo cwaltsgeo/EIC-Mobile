@@ -3,6 +3,7 @@ import Chart from 'chart.js/auto';
 import crosshairPlugin from 'chartjs-plugin-crosshair';
 import { ChartDataContext } from '../contexts/AppContext';
 import { VideoContext } from '../contexts/VideoContext';
+import { FPS } from '../utils/constants';
 
 export default function Panel({ selectedIndex }) {
     const { chartData } = useContext(ChartDataContext);
@@ -225,7 +226,7 @@ export default function Panel({ selectedIndex }) {
             const updateChartLineManually = () => {
                 if (chartInstanceRef.current) {
                     const totalDataPoints = chartData.length;
-                    const currentIndex = Math.floor(currentFrame / 12);
+                    const currentIndex = Math.floor(currentFrame / FPS);
                     const boundedIndex = Math.max(
                         Math.min(currentIndex, totalDataPoints - 1),
                         0

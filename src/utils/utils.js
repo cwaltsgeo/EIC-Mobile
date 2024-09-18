@@ -1,5 +1,5 @@
 
-export const handleImageServiceRequest = async (event, variable, setChartData, setVitalsData) => {
+export const handleImageServiceRequest = async (event, variable, setChartData) => {
   const point = event.mapPoint;
 
   const url = new URL(variable.service + "/getSamples");
