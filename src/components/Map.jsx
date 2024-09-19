@@ -149,8 +149,11 @@ export default function Home() {
 
         config.datasets.forEach((dataset) => {
             dataset.variables.forEach((variable, index) => {
+                const timestamp = Date.now();
+                const videoUrl = `${variable.video}?cb=${timestamp}`;
+
                 const element = new VideoElement({
-                    video: variable.video,
+                    video: videoUrl,
                     georeference: new ExtentAndRotationGeoreference({
                         extent: new Extent({
                             xmin: -180,
