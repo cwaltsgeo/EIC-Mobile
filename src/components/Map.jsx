@@ -272,6 +272,16 @@ export default function Home() {
                     handleDragEnd(view);
                 }
             });
+
+            view.on('click', async (event) => {
+                const mapPoint = view.toMap(event);
+
+                if (mapPoint) {
+                    await createBuffer(mapPoint, pointLayer, bufferLayer);
+                    lastKnownPoint = mapPoint;
+                    await handleMapClick({ mapPoint });
+                }
+            });
         });
 
         const searchWidget = new Search({ view });
@@ -309,6 +319,8 @@ export default function Home() {
     }
 
     useEffect(() => {
+        if (!isPlaying) return;
+
         const totalFrames = TOTAL_FRAMES;
         const frameDuration = FRAME_DURATION;
         let lastFrameTime = 0;
