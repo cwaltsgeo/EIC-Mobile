@@ -189,24 +189,26 @@ export default function Home() {
                         // when trying to pause the video as a default. This is a workaround to avoid
                         // the issue. See suggestions:
                         // https://developers.google.com/web/updates/2017/06/play-request-was-interrupted
-                        const playPromise = videoElement.play();
+                        if (videoElement.paused) {
+                            const playPromise = videoElement.play();
 
-                        if (playPromise !== undefined) {
-                            playPromise
-                                .then(() => {
-                                    if (!videoElement.paused) {
-                                        console.log(
-                                            `Video ${videoIndex} is playing`
+                            if (playPromise !== undefined) {
+                                playPromise
+                                    .then(() => {
+                                        if (!videoElement.paused) {
+                                            console.log(
+                                                `Video ${videoIndex} is playing`
+                                            );
+                                            videoElement.pause();
+                                        }
+                                    })
+                                    .catch((error) => {
+                                        console.error(
+                                            `Error playing video ${videoIndex}:`,
+                                            error
                                         );
-                                        videoElement.pause();
-                                    }
-                                })
-                                .catch((error) => {
-                                    console.error(
-                                        `Error playing video ${videoIndex}:`,
-                                        error
-                                    );
-                                });
+                                    });
+                            }
                         }
                     });
 

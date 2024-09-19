@@ -33,7 +33,10 @@ export default function Panel() {
     const [selectedVariableIndex, setSelectedVariableIndex] = useState(0);
 
     const handlePlayPause = () => {
+        const video = videoRefs.current[selectedVariableIndex];
+
         if (isPlaying) {
+            video.pause();
             setCurrentFrame(
                 videoRefs.current[selectedVariableIndex].currentTime * FPS
             );
