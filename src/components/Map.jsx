@@ -20,7 +20,6 @@ import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync'
 import { handleImageServiceRequest } from '../utils/utils';
 import { FPS, FRAME_DURATION, TOTAL_FRAMES } from '../utils/constants';
 import { Transition } from '@headlessui/react';
-import { isSafari } from '../utils/helpers';
 
 const bufferSymbol = {
     type: 'simple-fill',
@@ -192,9 +191,7 @@ export default function Home() {
 
                     // Safari (macOS and iOS) has stricter media policies which might prevent the videos from loading automatically.
                     // The load() method here forces Safari to load the video resources, so events like 'loadedmetadata' are fired.
-                    if (isSafari()) {
-                        videoElement.load();
-                    }
+                    videoElement.load();
 
                     videoElement.addEventListener('loadedmetadata', () => {
                         loadedCount += 1;
