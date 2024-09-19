@@ -4,7 +4,7 @@
             "datasetName": "Max Temperature",
             "variables": [
                 {
-                    "name": "SSP126 (1 FPS)",
+                    "name": "SSP126",
                     "description": "Heat Index",
                     "variable": "heatmax_ssp126",
                     "unit": "Heatmax",
@@ -34,7 +34,7 @@
                     ]
                 },
                 {
-                    "name": "SSP245 (2 FPS)",
+                    "name": "SSP245",
                     "description": "Heat Index",
                     "unit": "Heatmax",
                     "variable": "heatmax_ssp245",
@@ -64,7 +64,7 @@
                     ]
                 },
                 {
-                    "name": "SSP370 (3 FPS)",
+                    "name": "SSP370",
                     "description": "Heat Index",
                     "unit": "Heatmax",
                     "variable": "heatmax_ssp370",
