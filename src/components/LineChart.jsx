@@ -1,66 +1,152 @@
-import { useContext, useState, useEffect, useRef } from 'react';
-
-import ImageIdentifyParameters from '@arcgis/core/rest/support/ImageIdentifyParameters';
-import MosaicRule from "@arcgis/core/layers/support/MosaicRule.js";
-import TimeExtent from "@arcgis/core/TimeExtent.js";
-import * as imageService from '@arcgis/core/rest/imageService.js';
-
+import { useContext, useEffect, useRef, useState } from 'react';
 import Chart from 'chart.js/auto';
 import crosshairPlugin from 'chartjs-plugin-crosshair';
+import { ChartDataContext } from '../contexts/AppContext';
+import { VideoContext } from '../contexts/VideoContext';
+import { FPS } from '../utils/constants';
 
-import { MapViewContext, ChartSelectionContext, VitalSelectionContext, CurrentJSONContext } from '../contexts/AppContext';
-
-export default function Panel() {
-
-    const { mapView } = useContext(MapViewContext);
-    const { chartSelection } = useContext(ChartSelectionContext);
-    const { vitalSelection } = useContext(VitalSelectionContext);
-    const { currentJSON } = useContext(CurrentJSONContext);
-
-    const [clickHandle, setClickHandle] = useState(false)
-
+export default function Panel({ selectedIndex }) {
+    const { chartData } = useContext(ChartDataContext);
+    const { currentFrame, isPlaying, setIsPlaying, videoRefs } =
+        useContext(VideoContext);
     const chartRef = useRef(null);
-    const [chartInstance, setChartInstance] = useState(null);
-    const [chartData, setChartData] = useState([]);
+    const chartInstanceRef = useRef(null);
+    const [loading, setLoading] = useState(true);
+    const [wasPlaying, setWasPlaying] = useState(false);
 
     useEffect(() => {
         if (chartRef.current && chartData.length > 0) {
             const ctx = chartRef.current.getContext('2d');
 
-            // If there's an existing chart instance, update its data
-            if (chartInstance) {
-                chartInstance.data.labels = chartData.map(data => data.x);
-                chartInstance.data.datasets[0].data = chartData.map(data => data.y);
-                chartInstance.data.datasets[0].label = currentJSON.unit;
-                chartInstance.update();
-            } else {
-                // Create a new chart
-                const newChartInstance = new Chart(ctx, {
+            if (chartInstanceRef.current) {
+                chartInstanceRef.current.destroy();
+            }
+
+            if (ctx) {
+                chartInstanceRef.current = new Chart(ctx, {
                     type: 'line',
                     data: {
-                        labels: chartData.map(data => data.x),
-                        datasets: [{
-                            label: currentJSON.unit,
-                            data: chartData.map(data => data.y),
-                            borderColor: 'steelblue',
-                            fill: false
-                        }]
+                        labels: chartData.map((data) => data.x),
+                        datasets: [
+                            {
+                                label: 'SSP126',
+                                data: chartData.map(
+                                    (data) => data.heatmax_ssp126
+                                ),
+                                borderColor:
+                                    selectedIndex === 0
+                                        ? 'steelblue'
+                                        : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 0 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'SSP245',
+                                data: chartData.map(
+                                    (data) => data.heatmax_ssp245
+                                ),
+                                borderColor:
+                                    selectedIndex === 1
+                                        ? 'green'
+                                        : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 1 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'SSP370',
+                                data: chartData.map(
+                                    (data) => data.heatmax_ssp370
+                                ),
+                                borderColor:
+                                    selectedIndex === 2
+                                        ? 'orange'
+                                        : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 2 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'SSP585',
+                                data: chartData.map(
+                                    (data) => data.heatmax_ssp585
+                                ),
+                                borderColor:
+                                    selectedIndex === 3
+                                        ? 'red'
+                                        : 'rgba(239, 239, 240, 0.2)',
+                                borderWidth: selectedIndex === 2 ? 2 : 0.5,
+                                fill: false,
+                                pointRadius: 0,
+                                borderWidth: 1
+                            }
+                        ]
                     },
                     options: {
                         responsive: true,
+                        animation: false,
+                        maintainAspectRatio: false,
                         interaction: {
                             intersect: false,
-                            mode: 'index',
+                            mode: 'index'
                         },
                         scales: {
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    display: false,
+                                    maxTicksLimit: 5
+                                }
+                            },
                             y: {
-                                beginAtZero: true
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    color: 'white',
+                                    maxTicksLimit: 10
+                                },
+                                beginAtZero: false
                             }
                         },
                         plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                                titleColor: '#FFD700',
+                                bodyColor: '#FFFFFF',
+                                displayColors: false,
+                                callbacks: {
+                                    title: function (tooltipItems) {
+                                        return tooltipItems[0].label;
+                                    },
+                                    label: function (tooltipItem) {
+                                        const datasetIndex =
+                                            tooltipItem.datasetIndex;
+                                        if (datasetIndex === selectedIndex) {
+                                            return (
+                                                Math.round(
+                                                    tooltipItem.raw * 100
+                                                ) /
+                                                    100 +
+                                                ' °F'
+                                            );
+                                        }
+                                        return '';
+                                    }
+                                }
+                            },
                             crosshair: {
                                 line: {
-                                    color: '#F66',
+                                    color: 'transparent',
                                     width: 1
                                 },
                                 snap: true,
@@ -73,131 +159,126 @@ export default function Panel() {
                                     beforeZoom: function (start, end) {
                                         return true;
                                     },
-                                    afterZoom: function (start, end) {
-                                    }
+                                    afterZoom: function (start, end) {}
                                 }
                             }
                         }
                     },
-                    plugins: [crosshairPlugin]
+                    plugins: [
+                        crosshairPlugin,
+                        {
+                            id: 'verticalLinePlugin',
+                            afterDraw: (chart) => {
+                                if (chart.tooltip?._active?.length) {
+                                    const activePoint =
+                                        chart.tooltip._active[0];
+                                    const ctx = chart.ctx;
+                                    const x = activePoint.element.x;
+                                    const topY = chart.scales.y.top;
+                                    const bottomY = chart.scales.y.bottom;
+
+                                    ctx.save();
+                                    ctx.beginPath();
+                                    ctx.moveTo(x, topY);
+                                    ctx.lineTo(x, bottomY);
+                                    ctx.lineWidth = 1;
+                                    ctx.strokeStyle = '#FFFFFF';
+                                    ctx.stroke();
+                                    ctx.restore();
+                                }
+                            }
+                        },
+                        {
+                            id: 'customCanvasBackgroundColor',
+                            beforeDraw: (chart) => {
+                                const ctx = chart.canvas.getContext('2d');
+                                ctx.save();
+                                ctx.globalCompositeOperation =
+                                    'destination-over';
+                                ctx.fillStyle = 'rgba(0, 0, 255, 0.1)';
+                                const yAxisWidth = chart.scales.y.width;
+                                ctx.fillRect(
+                                    yAxisWidth,
+                                    0,
+                                    chart.width - yAxisWidth,
+                                    chart.height
+                                );
+                                ctx.restore();
+                            }
+                        }
+                    ]
                 });
 
-                // Save the new chart instance
-                setChartInstance(newChartInstance);
+                setLoading(false);
             }
         }
-    }, [chartData, chartInstance, currentJSON]);
 
-    // Feed the chart with pixel values
-    const queryPixels = (event) => {
-        console.log('Querying Pixels');
-
-        if (!currentJSON.wcs) {
-            console.log('...from Image Service');
-            const point = mapView.toMap({ x: event.x, y: event.y });
-            console.log("Clicked at:", point.latitude, point.longitude);
-            let params = {
-                geometry: event.mapPoint,
-                processAsMultidimensional: true,
-                returnFirstValueOnly: false,
-                timeExtent: new TimeExtent({
-                    start: new Date(currentJSON.datetimeRange?.[0] || Date.UTC(2020, 1, 1)),
-                    end: new Date(currentJSON.datetimeRange?.[1] || Date.UTC(2030, 1, 1))
-                }),
-                returnPixelValues: true,
-                returnCatalogItems: false,
-                returnGeometry: false,
-            };
-
-            if (currentJSON.variable) {
-                params = {
-                    ...params,
-                    mosaicRule: new MosaicRule({
-                        multidimensionalDefinition: [{variableName: currentJSON.variable}]
-                    }),
-                }
+        return () => {
+            if (chartInstanceRef.current) {
+                chartInstanceRef.current.destroy();
+                chartInstanceRef.current = null;
             }
-
-            const imageIdentifyParams = new ImageIdentifyParameters(params);
-
-            console.log("querying statistics")
-            imageService.identify(currentJSON.service, imageIdentifyParams).then((results) => {
-                console.log(results)
-                var pixelValues = []
-                var timeStamps = []
-
-                if (results.value) {
-                    results.value.split('; ').map(Number).map(i => pixelValues.push(i));
-                    results.properties.Attributes.map(i => timeStamps.push(i.StdTime));
-                    //timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { year: 'numeric', month: 'numeric', day: 'numeric' }));
-                    timeStamps = timeStamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric', hour: 'numeric' }));
-
-                    setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
-                }
-            });
-        } else {
-            console.log('...from WCS');
-            const point = mapView.toMap({ x: event.x, y: event.y });
-            console.log("Clicked at:", point.latitude, point.longitude);
-            
-            var timeStamps = []
-
-            // build WCS URL
-            const request = currentJSON.wcsParams.request;
-            const version = currentJSON.wcsParams.version;
-            const coverage = currentJSON.wcsParams.coverageId;
-            const format = currentJSON.wcsParams.format;
-            const xySubset = `SUBSET=Lat(${point.latitude},${point.latitude})&SUBSET=Lon(${point.longitude},${point.longitude})`
-            const timeSubset = `SUBSET=ansi("2001-01-01T00:00:00.000Z","2002-01-01T00:00:00.000Z")` // TODO: hard coded for now
-            const wcsTimestamps = ["2001-01-01T00:00:00.000Z", "2001-02-01T00:00:00.000Z", "2001-03-01T00:00:00.000Z", "2001-04-01T00:00:00.000Z", "2001-05-01T00:00:00.000Z", "2001-06-01T00:00:00.000Z", "2001-07-01T00:00:00.000Z", "2001-08-01T00:00:00.000Z", "2001-09-01T00:00:00.000Z", "2001-10-01T00:00:00.000Z", "2001-11-01T00:00:00.000Z", "2001-12-01T00:00:00.000Z", "2002-01-01T00:00:00.000Z"] // TODO: hard coded for now
-            
-            const wcsUrl = `https://ows.rasdaman.org/rasdaman/ows?&SERVICE=WCS&VERSION=${version}&REQUEST=${request}&COVERAGEID=${coverage}&${timeSubset}&${xySubset}&FORMAT=${format}`;
-            
-            // submit WCS Request
-            console.log("Fetching WCS Coverage:", wcsUrl);
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', wcsUrl, true);
-            xhr.responseType = 'json';
-    
-            xhr.onload = function (e) {
-              var wcsJSON = this.response;
-              // handle WCS response
-              if (wcsJSON) {
-                // Format time stamps
-                timeStamps = wcsTimestamps.map(i => new Date(i).toLocaleDateString('en-us', { month: 'numeric', day: 'numeric' }));
-
-                // double-flatten the array
-                const pixelValues = wcsJSON.flat().flat();
-
-                setChartData(pixelValues.map((y, i) => ({ x: timeStamps[i], y })));
-              }
-            };
-            xhr.send();
-    
-        }
-
-    };
-
-    // Add onClick event listener to the map view when the chart panel is selected
-    if (!vitalSelection && chartSelection) {
-        if (!clickHandle) {
-            console.log('Adding handles');
-            mapView.addHandles(mapView.on('click', queryPixels));
-            setClickHandle(true);
         };
-        // Remove the onClick event listener when the chart panel is deselecteds
-    } else if ((vitalSelection && !chartSelection) || (!chartSelection)) {
-        if (clickHandle) {
-            console.log('Removing handles');
-            mapView?.removeHandles(mapView.queryPixels);
-            setClickHandle(false);
-        }
-    }
+    }, [chartData, selectedIndex]);
 
+    useEffect(() => {
+        if (chartData.length > 0) {
+            const updateChartLineManually = () => {
+                if (chartInstanceRef.current) {
+                    const totalDataPoints = chartData.length;
+                    const currentIndex = Math.floor(currentFrame / FPS);
+                    const boundedIndex = Math.max(
+                        Math.min(currentIndex, totalDataPoints - 1),
+                        0
+                    );
+
+                    chartInstanceRef.current.tooltip.setActiveElements(
+                        [
+                            {
+                                datasetIndex: selectedIndex,
+                                index: boundedIndex
+                            }
+                        ],
+                        {
+                            x:
+                                chartInstanceRef.current.getDatasetMeta(
+                                    selectedIndex
+                                ).data[boundedIndex]?.x || 0,
+                            y:
+                                chartInstanceRef.current.getDatasetMeta(
+                                    selectedIndex
+                                ).data[boundedIndex]?.y || 0
+                        }
+                    );
+
+                    chartInstanceRef.current.update();
+                }
+            };
+
+            updateChartLineManually();
+        }
+    }, [chartData, currentFrame, selectedIndex]);
 
     return (
-        <div style={{ width: '100%', height: '25vh' }}>
-            <canvas ref={chartRef} style={{ width: '100%', height: '100%' }}></canvas>
+        <div
+            style={{
+                position: 'relative'
+            }}
+            className="h-[150px] md:h-[200px]"
+            onMouseEnter={() => {
+                setWasPlaying(isPlaying);
+                setIsPlaying(false);
+            }}
+            onMouseLeave={() => {
+                if (wasPlaying) setIsPlaying(true);
+            }}
+        >
+            <canvas ref={chartRef} style={{ width: '100%' }}></canvas>
+            {loading && (
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-full h-1/4 bg-neutral-950 bg-opacity-90 rounded-md animate-pulse"></div>
+                </div>
+            )}
         </div>
     );
 }
