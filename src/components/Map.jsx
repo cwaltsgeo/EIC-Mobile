@@ -153,7 +153,7 @@ export default function Home() {
         config.datasets.forEach((dataset) => {
             dataset.variables.forEach((variable, index) => {
                 const timestamp = Date.now();
-                const videoUrl = `${variable.video}?cb=${timestamp}`;
+                const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, "")}${variable.video}?cb=${timestamp}`;
 
                 const element = new VideoElement({
                     video: videoUrl,
@@ -177,7 +177,7 @@ export default function Home() {
                 mediaLayer.opacity = variable.name === 'SSP126' ? 1 : 0;
 
                 console.log(
-                    `Initializing video for: ${variable.name}`,
+                    `Initializing video for: ${import.meta.env.BASE_URL}${variable.name}`,
                     variable.video
                 );
 
