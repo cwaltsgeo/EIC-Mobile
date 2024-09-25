@@ -75,7 +75,9 @@ jobs:
           GOOGLE_TAG_MANAGER_ID: ${{secrets.GOOGLE_TAG_MANAGER_ID}}
           GOOGLE_TAG_AUTH: ${{secrets.GOOGLE_TAG_AUTH}}
           GOOGLE_TAG_PREVIEW: ${{secrets.GOOGLE_TAG_PREVIEW}}
-        run: npm run build  # vars.SUBPATH should include the preceeding slash /
+        run: |
+          npm install
+          npm run build  # vars.SUBPATH should include the preceeding slash /
 
   deploy:
     runs-on: ubuntu-latest
