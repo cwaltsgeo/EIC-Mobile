@@ -5,10 +5,9 @@ import { ChartDataContext } from '../contexts/AppContext';
 import { VideoContext } from '../contexts/VideoContext';
 import { FPS } from '../utils/constants';
 
-export default function Panel({ selectedIndex }) {
+export default function LineChart({ selectedIndex }) {
     const { chartData } = useContext(ChartDataContext);
-    const { currentFrame, isPlaying, setIsPlaying, videoRefs } =
-        useContext(VideoContext);
+    const { currentFrame, isPlaying, setIsPlaying } = useContext(VideoContext);
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
     const [loading, setLoading] = useState(true);
@@ -31,7 +30,7 @@ export default function Panel({ selectedIndex }) {
                             {
                                 label: 'SSP126',
                                 data: chartData.map(
-                                    (data) => data.heatmax_ssp126
+                                    (data) => data.tasmax_ssp126
                                 ),
                                 borderColor:
                                     selectedIndex === 0
@@ -45,7 +44,7 @@ export default function Panel({ selectedIndex }) {
                             {
                                 label: 'SSP245',
                                 data: chartData.map(
-                                    (data) => data.heatmax_ssp245
+                                    (data) => data.tasmax_ssp245
                                 ),
                                 borderColor:
                                     selectedIndex === 1
@@ -59,7 +58,7 @@ export default function Panel({ selectedIndex }) {
                             {
                                 label: 'SSP370',
                                 data: chartData.map(
-                                    (data) => data.heatmax_ssp370
+                                    (data) => data.tasmax_ssp370
                                 ),
                                 borderColor:
                                     selectedIndex === 2
@@ -73,7 +72,7 @@ export default function Panel({ selectedIndex }) {
                             {
                                 label: 'SSP585',
                                 data: chartData.map(
-                                    (data) => data.heatmax_ssp585
+                                    (data) => data.tasmax_ssp585
                                 ),
                                 borderColor:
                                     selectedIndex === 3
