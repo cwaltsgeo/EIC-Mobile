@@ -2,15 +2,17 @@
     "datasets": [
         {
             "datasetName": "Max Temperature",
+            "datasetVariablesTagline": "GHG Emissions Scenario",
             "variables": [
                 {
-                    "name": "SSP126",
-                    "description": "Heat Index",
-                    "variable": "heatmax_ssp126",
+                    "name": "126 - Low",
+                    "description": "Carbon dioxide emissions decline to net zero around 2070, followed by varying levels of reductions in existing carbon dioxide in the atmosphere.",
+                    "variable": "tasmax_ssp126",
                     "unit": "Heatmax",
-                    "video": "/composited_1fps_g1_crf18.mp4",
+                    "video": "/tasmax_monthly_ssp126_max12_8192_1024x512.mp4",
+                    "mobileVideo": "/tasmax_monthly_ssp126_max12_8192_512x256.mp4",
                     "service":
-                    "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
+                    "https://gis.earthdata.nasa.gov/eic/rest/services/tasmax_yearly_median/ImageServer",
                     "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
                     "wcs": false,
                     "active": true,
@@ -34,13 +36,14 @@
                     ]
                 },
                 {
-                    "name": "SSP245",
-                    "description": "Heat Index",
+                    "name": "245 - Intermediate",
+                    "description": "Carbon dioxide emissions remain around current levels until the middle of the 21st century.",
                     "unit": "Heatmax",
-                    "variable": "heatmax_ssp245",
-                    "video": "/composited_1fps_g1_crf18.mp4",
+                    "variable": "tasmax_ssp245",
+                    "video": "/tasmax_monthly_ssp245_max12_8192_1024x512.mp4",
+                    "mobileVideo": "/tasmax_monthly_ssp245_max12_8192_1024x512.mp4",
                     "service":
-                    "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
+                    "https://gis.earthdata.nasa.gov/eic/rest/services/tasmax_yearly_median/ImageServer",
                     "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
                     "wcs": false,
                     "active": true,
@@ -64,13 +67,14 @@
                     ]
                 },
                 {
-                    "name": "SSP370",
-                    "description": "Heat Index",
+                    "name": "370 - High",
+                    "description": "Carbon dioxide emissions roughly double from current levels by 2100.",
                     "unit": "Heatmax",
-                    "variable": "heatmax_ssp370",
-                    "video": "/composited_1fps_g1_crf18.mp4",
+                    "variable": "tasmax_ssp370",
+                    "video": "/tasmax_monthly_ssp370_max12_8192_1024x512.mp4",
+                    "mobileVideo": "/tasmax_monthly_ssp370_max12_8192_512x256.mp4",
                     "service":
-                    "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
+                    "https://gis.earthdata.nasa.gov/eic/rest/services/tasmax_yearly_median/ImageServer",
                     "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
                     "wcs": false,
                     "active": true,
@@ -94,48 +98,14 @@
                     ]
                 },
                 {
-                    "name": "SSP585",
-                    "description": "Heat Index",
+                    "name": "585 - Very High",
+                    "description": "Carbon dioxide emissions roughly double from current levels by 2050.",
                     "unit": "Heatmax",
-                    "video": "/composited_1fps_g1_crf18.mp4",
-                    "variable": "heatmax_ssp585",
+                    "video": "/tasmax_monthly_ssp585_max12_8192_1024x512.mp4",
+                    "mobileVideo": "/tasmax_monthly_ssp585_max12_8192_512x256.mp4",
+                    "variable": "tasmax_ssp585",
                     "service":
-                    "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
-                    "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
-                    "wcs": false,
-                    "active": true,
-                    "vitals": {
-                        "globalMin": 0,
-                        "globalMax": 0,
-                        "globalAverage": 0,
-                        "globalTrend": 0
-                    },
-                    "tour": [
-                        {
-                            "stop": 0,
-                            "location": {
-                                "latitude": 0,
-                                "longitude": 0,
-                                "zoom": 2,
-                                "delay": 10000
-                            },
-                            "text": "This tour demonstrates the global distribution of the Monthly Maximum Heat Index (Heatmax), highlighting the areas most affected by extreme heat."
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "datasetName": "Precipitation (TBD)",
-            "variables": [
-                {
-                    "name": "TBD",
-                    "description": "Heat Index",
-                    "unit": "Heatmax",
-                    "variable": "heatmax_ssp126",
-                    "video": "/composited_1fps_g1_crf18.mp4",
-                    "service":
-                    "https://gis.earthdata.nasa.gov/maphost/rest/services/EIC/heatmax_median_multivariate/ImageServer",
+                    "https://gis.earthdata.nasa.gov/eic/rest/services/tasmax_yearly_median/ImageServer",
                     "datetimeRange": ["1950-01-31T00:00:00Z", "2100-12-31T23:59:59Z"],
                     "wcs": false,
                     "active": true,

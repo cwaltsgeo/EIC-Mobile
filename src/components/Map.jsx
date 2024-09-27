@@ -20,19 +20,15 @@ import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync'
 import { handleImageServiceRequest } from '../utils/utils';
 import { FPS, FRAME_DURATION, TOTAL_FRAMES } from '../utils/constants';
 import { Transition } from '@headlessui/react';
+import Expand from '@arcgis/core/widgets/Expand';
+import { isMobileDevice } from '../utils/helpers';
+import {
+    bufferSymbol,
+    crosshairSymbol,
+    createCornerAngles
+} from '../utils/sceneHelpers';
 
-const bufferSymbol = {
-    type: 'simple-fill',
-    color: [5, 80, 216, 0.5],
-    outline: { color: [2, 28, 75, 1], width: 2, style: 'dot' }
-};
-
-const pointSymbol = {
-    type: 'simple-marker',
-    color: [5, 80, 216, 0.5],
-    outline: { color: [2, 28, 75, 1], width: 1 },
-    size: 7
-};
+import ShareModal from './ShareModal';
 
 const createFeatureLayer = (url) =>
     new FeatureLayer({
@@ -51,51 +47,94 @@ const createFeatureLayer = (url) =>
         popupEnabled: false
     });
 
-const initializeLayers = (map) => {
-    const pointLayer = new GraphicsLayer({ title: 'Geodesic-Point' });
-    const bufferLayer = new GraphicsLayer({ title: 'Geodesic-Buffer' });
-    map.addMany([pointLayer, bufferLayer]);
-
-    return { bufferLayer, pointLayer };
-};
-
-const createBuffer = async (point, pointLayer, bufferLayer) => {
-    const buffer = await geometryEngineAsync.geodesicBuffer(
-        point,
-        560,
-        'kilometers'
-    );
-
-    if (!pointLayer.graphics.length) {
-        pointLayer.add(new Graphic({ geometry: point, symbol: pointSymbol }));
-        bufferLayer.add(
-            new Graphic({ geometry: buffer, symbol: bufferSymbol })
-        );
-    } else {
-        pointLayer.graphics.getItemAt(0).geometry = point;
-        bufferLayer.graphics.getItemAt(0).geometry = buffer;
-    }
-};
-
 export default function Home() {
-    const {
-        videoRefs,
-        currentFrame,
-        setCurrentFrame,
-        setIsPlaying,
-        isPlaying
-    } = useContext(VideoContext);
+    const { videoRefs, currentFrame, setCurrentFrame, isPlaying } =
+        useContext(VideoContext);
     const { mapView, setMapView } = useContext(MapViewContext);
     const { setChartData } = useContext(ChartDataContext);
     const { dataSelection } = useContext(DataSelectionContext);
 
     const [showTransition, setShowTransition] = useState(true);
+    const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
 
     const mapDiv = useRef(null);
 
     let draggingInsideBuffer = false;
     let initialCamera;
     let lastKnownPoint;
+    let bufferLayer;
+    let pointLayer;
+
+    const initializeLayers = (map) => {
+        pointLayer = new GraphicsLayer({ title: 'Geodesic-Point' });
+        bufferLayer = new GraphicsLayer({ title: 'Geodesic-Buffer' });
+        map.addMany([pointLayer, bufferLayer]);
+
+        return { bufferLayer, pointLayer };
+    };
+
+    const createBuffer = async (point, pointLayer, bufferLayer) => {
+        const sideLength = 7;
+
+        const squarePolygon = {
+            type: 'polygon',
+            rings: [
+                [
+                    [point.x - sideLength / 2, point.y - sideLength / 2],
+                    [point.x + sideLength / 2, point.y - sideLength / 2],
+                    [point.x + sideLength / 2, point.y + sideLength / 2],
+                    [point.x - sideLength / 2, point.y + sideLength / 2],
+                    [point.x - sideLength / 2, point.y - sideLength / 2]
+                ]
+            ],
+            spatialReference: point.spatialReference
+        };
+
+        const cornerAngles = createCornerAngles(point, sideLength);
+
+        const angleSymbol = {
+            type: 'simple-line',
+            color: [5, 80, 216],
+            width: 1
+        };
+
+        const bufferGraphic = new Graphic({
+            geometry: squarePolygon,
+            symbol: bufferSymbol
+        });
+
+        if (!pointLayer.graphics.length) {
+            pointLayer.add(
+                new Graphic({ geometry: point, symbol: crosshairSymbol })
+            );
+            bufferLayer.add(bufferGraphic);
+
+            cornerAngles.forEach((cornerGeometry) => {
+                bufferLayer.add(
+                    new Graphic({
+                        geometry: cornerGeometry,
+                        symbol: angleSymbol
+                    })
+                );
+            });
+        } else {
+            pointLayer.graphics.getItemAt(0).geometry = point;
+
+            bufferLayer.graphics.getItemAt(0).geometry = squarePolygon;
+            bufferLayer.graphics.getItemAt(0).symbol = bufferSymbol;
+
+            bufferLayer.removeAll();
+            bufferLayer.add(bufferGraphic);
+            cornerAngles.forEach((cornerGeometry) => {
+                bufferLayer.add(
+                    new Graphic({
+                        geometry: cornerGeometry,
+                        symbol: angleSymbol
+                    })
+                );
+            });
+        }
+    };
 
     const handleDragStart = async (event, view, bufferLayer) => {
         const startPoint = view.toMap({ x: event.x, y: event.y });
@@ -132,7 +171,7 @@ export default function Home() {
             view.goTo(initialCamera, { animate: false });
 
             if (lastKnownPoint) {
-                await handleMapClick({ mapPoint: lastKnownPoint });
+                await handleMapClick({ mapPoint: lastKnownPoint }, view);
             }
 
             draggingInsideBuffer = false;
@@ -152,8 +191,9 @@ export default function Home() {
 
         config.datasets.forEach((dataset) => {
             dataset.variables.forEach((variable, index) => {
-                const timestamp = Date.now();
-                const videoUrl = `${import.meta.env.BASE_URL.replace(/\/$/, "")}${variable.video}?cb=${timestamp}`;
+                const videoUrl = isMobileDevice()
+                    ? variable.mobileVideo
+                    : variable.video;
 
                 const element = new VideoElement({
                     video: videoUrl,
@@ -169,18 +209,19 @@ export default function Home() {
 
                 const mediaLayer = new MediaLayer({
                     source: [element],
-                    title: variable.name
+                    title: variable.name,
+                    zIndex: index,
+                    opacity: variable.name === '126 - Low' ? 1 : 0
                 });
 
                 layerList.push(mediaLayer);
-
-                mediaLayer.opacity = variable.name === 'SSP126' ? 1 : 0;
 
                 console.log(
                     `Initializing video for: ${import.meta.env.BASE_URL}${variable.name}`,
                     variable.video
                 );
 
+                console.log('ovde ', videoRefs);
                 element.when(() => {
                     const videoElement = element.content;
                     videoRefs.current[videoIndex] = videoElement;
@@ -199,7 +240,7 @@ export default function Home() {
         const view = new SceneView({
             container: mapDiv?.current,
             map: map,
-            center: [-80, 40],
+            center: [-77.0369, 38.9072],
             popupEnabled: true,
             popup: new Popup({
                 defaultPopupTemplateEnabled: true,
@@ -220,12 +261,16 @@ export default function Home() {
             }
         });
 
+        view.ui.add('attribution', {
+            position: 'bottom-right'
+        });
+
         const { bufferLayer, pointLayer } = initializeLayers(map);
 
         view.when(async () => {
             const initialCenterPoint = new Point({
-                longitude: -51.9253,
-                latitude: -14.235,
+                longitude: -77.0369,
+                latitude: 38.9072,
                 spatialReference: { wkid: 4326 }
             });
 
@@ -255,17 +300,57 @@ export default function Home() {
                 if (mapPoint) {
                     await createBuffer(mapPoint, pointLayer, bufferLayer);
                     lastKnownPoint = mapPoint;
-                    await handleMapClick({ mapPoint });
+                    await handleMapClick({ mapPoint }, view);
                 }
             });
         });
 
-        const searchWidget = new Search({ view });
-        view.ui.add(searchWidget, { position: 'top-right' });
+        const searchWidget = new Search({ view, popupEnabled: false });
+
+        const searchExpand = new Expand({
+            view: view,
+            content: searchWidget,
+            expandIcon: 'search',
+            expandTooltip: 'Search',
+            expanded: false,
+            mode: 'floating'
+        });
+
+        view.ui.add(searchExpand, 'top-right');
+
+        searchWidget.on('select-result', async (event) => {
+            const result = event.result;
+            const point = result.feature.geometry;
+
+            if (point) {
+                await view.goTo({
+                    target: point,
+                    zoom: 10
+                });
+
+                view.graphics.removeAll();
+
+                await createBuffer(point, pointLayer, bufferLayer);
+                lastKnownPoint = point;
+
+                await handleMapClick({ mapPoint: point }, view);
+
+                searchExpand.collapse();
+            }
+        });
+
         view.ui.move('zoom', 'top-right');
-        view.ui.move('compass', 'top-right');
-        view.ui.move('navigation-toggle', 'top-right');
-        view.ui.move('attribution', 'bottom-right');
+
+        const customShareButton = document.createElement('div');
+        customShareButton.className =
+            'esri-widget esri-widget--button esri-interactive';
+        customShareButton.innerHTML = '<span class="esri-icon-share2"></span>';
+        customShareButton.title = 'Share';
+        customShareButton.onclick = () => {
+            setIsShareMenuOpen(!isShareMenuOpen);
+        };
+
+        view.ui.add(customShareButton, 'top-right');
 
         setMapView(view);
 
@@ -276,10 +361,55 @@ export default function Home() {
         };
     }, [setMapView, videoRefs]);
 
-    const handleMapClick = async (event) => {
+    const handleMapClick = async (event, view) => {
         const [_, selectedVariable] = dataSelection;
 
-        await handleImageServiceRequest(event, selectedVariable, setChartData);
+        const dataIsValid = await handleImageServiceRequest(
+            event,
+            selectedVariable,
+            setChartData
+        );
+
+        if (!dataIsValid) {
+            const washingtonDCPoint = new Point({
+                longitude: -77.0369,
+                latitude: 38.9072,
+                spatialReference: { wkid: 4326 }
+            });
+
+            if (
+                Math.abs(
+                    event.mapPoint.longitude - washingtonDCPoint.longitude
+                ) > 0.0001 ||
+                Math.abs(event.mapPoint.latitude - washingtonDCPoint.latitude) >
+                    0.0001
+            ) {
+                await view.goTo({
+                    center: [
+                        washingtonDCPoint.longitude,
+                        washingtonDCPoint.latitude
+                    ],
+                    zoom: 10
+                });
+
+                await createBuffer(washingtonDCPoint, pointLayer, bufferLayer);
+
+                const eventForDC = { mapPoint: washingtonDCPoint };
+                const dataIsValidDC = await handleImageServiceRequest(
+                    eventForDC,
+                    selectedVariable,
+                    setChartData
+                );
+
+                if (!dataIsValidDC) {
+                    console.error('Data is invalid even for Washington DC');
+                    setChartData([]);
+                }
+            } else {
+                console.error('Data is invalid even for Washington DC');
+                setChartData([]);
+            }
+        }
     };
 
     function isSeekable(videoElement, time) {
@@ -372,12 +502,18 @@ export default function Home() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
             >
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-85">
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90">
                     <p className="text-white text-xl font-light tracking-wide leading-relaxed text-center max-w-xs sm:max-w-md">
                         Preparing your journey, please wait...
                     </p>
                 </div>
             </Transition>
+
+            <ShareModal
+                isOpen={isShareMenuOpen}
+                onClose={() => setIsShareMenuOpen(false)}
+            />
+
             <div ref={mapDiv} style={{ height: '100vh' }}></div>
         </div>
     );
