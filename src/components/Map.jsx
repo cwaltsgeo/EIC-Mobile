@@ -256,9 +256,6 @@ export default function Home() {
                 altitude: {
                     min: 2000000
                 }
-            },
-            padding: {
-                bottom: 150
             }
         });
 
@@ -514,9 +511,7 @@ export default function Home() {
                 leaveTo="opacity-0"
             >
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-90">
-                    <p className="text-white text-xl font-light tracking-wide leading-relaxed text-center max-w-xs sm:max-w-md">
-                        Preparing your journey, please wait...
-                    </p>
+                    <div className="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
                 </div>
             </Transition>
 
