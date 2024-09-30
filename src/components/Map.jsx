@@ -317,17 +317,25 @@ export default function Home() {
 
         view.ui.add(searchExpand, 'top-right');
 
-        const blurOverlay = document.getElementById('blur-overlay');
+        const blurOverlay = blurOverlayRef.current;
 
         searchExpand.watch('expanded', (isExpanded) => {
-            if (isExpanded) {
+            const blurOverlay = blurOverlayRef.current;
+
+            if (isExpanded && blurOverlay) {
                 setIsBlurActive(true);
                 blurOverlay.classList.add('active');
-            } else {
+            } else if (blurOverlay) {
                 setIsBlurActive(false);
                 blurOverlay.classList.remove('active');
             }
         });
+
+        if (blurOverlayRef.current) {
+            blurOverlayRef.current.addEventListener('click', () => {
+                searchExpand.collapse();
+            });
+        }
 
         searchWidget.on('select-result', async (event) => {
             const result = event.result;

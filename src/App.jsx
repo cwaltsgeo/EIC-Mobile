@@ -9,6 +9,7 @@ import {
 } from './contexts/AppContext';
 import { VideoProvider } from './contexts/VideoContext';
 import config from './config.json';
+import RotateOverlay from './components/RotateOverlay';
 
 export default function App() {
     const defaultDataset = config.datasets[0];
@@ -29,6 +30,7 @@ export default function App() {
                     <ChartDataContext.Provider
                         value={{ chartData, setChartData }}
                     >
+                        <RotateOverlay />
                         <EICLogo />
                         <Panel />
                         <Map />
