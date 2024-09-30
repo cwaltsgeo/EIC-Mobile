@@ -137,7 +137,7 @@ export default function Panel() {
             {!isModalOpen && (
                 <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 shadow-lg z-10 flex w-full lg:w-[762px] max-w-none max-h-none">
                     <div style={{ width: '100%', height: '100%' }}>
-                        <div className="flex flex-col w-full h-full bg-black bg-opacity-70 shadow-lg backdrop-blur-lg p-6 gap-5">
+                        <div className="flex flex-col w-full h-full bg-black bg-opacity-70 shadow-lg backdrop-blur-lg p-3 sm:p-6 gap-5">
                             <div className="flex justify-between items-center w-full">
                                 <div className="flex gap-2 items-center w-full md:w-auto">
                                     <div className="flex flex-col items-start md:items-center w-1/2 md:w-auto md:flex-row">
@@ -208,14 +208,14 @@ export default function Panel() {
                             <div className="w-full border-t border-gray-500"></div>
 
                             {/* Chart */}
-                            <div className="w-full h-[220px] md:h-[250px] flex items-start overflow-x-auto md:overflow-visible">
+                            <div className="panel-max-values w-full h-[220px] md:h-[250px] flex items-start overflow-x-auto md:overflow-visible">
                                 <div
                                     className="flex-1"
                                     style={{ minWidth: '600px' }}
                                 >
                                     <div
-                                        className="flex justify-between mb-2 ml-3"
-                                        style={{ width: 'calc(100% + 8px)' }}
+                                        className="flex justify-between mb-2"
+                                        style={{ width: '100%' }}
                                     >
                                         {getMaxValuesForYears.map(
                                             (item, idx) => (
@@ -238,7 +238,10 @@ export default function Panel() {
                                                                 className="flex items-baseline"
                                                                 style={{
                                                                     color: getTemperatureColor(
-                                                                        item.value
+                                                                        item.value,
+                                                                        isFahrenheit
+                                                                            ? 'F'
+                                                                            : 'C'
                                                                     )
                                                                 }}
                                                             >

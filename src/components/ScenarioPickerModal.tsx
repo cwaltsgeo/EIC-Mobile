@@ -29,7 +29,7 @@ export default function ScenarioPickerModal({
 
     return (
         <div
-            className="fixed inset-0 z-[99] w-full h-full bg-black bg-opacity-30 backdrop-blur-lg flex justify-center items-center"
+            className="fixed inset-0 z-[999] w-full h-full bg-black bg-opacity-30 backdrop-blur-lg flex justify-center items-center"
             onClick={handleClickOutside}
         >
             <div id="modal-background" className="relative w-full h-full bg-transparent flex flex-col justify-center items-center p-6 max-w-none">

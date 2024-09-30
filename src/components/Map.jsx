@@ -94,7 +94,7 @@ export default function Home() {
 
         const angleSymbol = {
             type: 'simple-line',
-            color: [5, 80, 216],
+            color: [255, 255, 255],
             width: 1
         };
 
@@ -211,7 +211,8 @@ export default function Home() {
                     source: [element],
                     title: variable.name,
                     zIndex: index,
-                    opacity: variable.name === '126 - Low' ? 1 : 0
+                    opacity: variable.name === '126 - Low' ? 1 : 0,
+                    copyright: "NASA's Goddard Space Flight Center"
                 });
 
                 layerList.push(mediaLayer);
@@ -318,6 +319,16 @@ export default function Home() {
 
         view.ui.add(searchExpand, 'top-right');
 
+        const blurOverlay = document.getElementById('blur-overlay');
+
+        searchExpand.watch('expanded', (isExpanded) => {
+            if (isExpanded) {
+                blurOverlay.classList.add('active');
+            } else {
+                blurOverlay.classList.remove('active');
+            }
+        });
+
         searchWidget.on('select-result', async (event) => {
             const result = event.result;
             const point = result.feature.geometry;
@@ -371,7 +382,7 @@ export default function Home() {
         );
 
         if (!dataIsValid) {
-            const washingtonDCPoint = new Point({
+            const defaultScenePoint = new Point({
                 longitude: -77.0369,
                 latitude: 38.9072,
                 spatialReference: { wkid: 4326 }
@@ -379,22 +390,22 @@ export default function Home() {
 
             if (
                 Math.abs(
-                    event.mapPoint.longitude - washingtonDCPoint.longitude
+                    event.mapPoint.longitude - defaultScenePoint.longitude
                 ) > 0.0001 ||
-                Math.abs(event.mapPoint.latitude - washingtonDCPoint.latitude) >
+                Math.abs(event.mapPoint.latitude - defaultScenePoint.latitude) >
                     0.0001
             ) {
                 await view.goTo({
                     center: [
-                        washingtonDCPoint.longitude,
-                        washingtonDCPoint.latitude
+                        defaultScenePoint.longitude,
+                        defaultScenePoint.latitude
                     ],
                     zoom: 10
                 });
 
-                await createBuffer(washingtonDCPoint, pointLayer, bufferLayer);
+                await createBuffer(defaultScenePoint, pointLayer, bufferLayer);
 
-                const eventForDC = { mapPoint: washingtonDCPoint };
+                const eventForDC = { mapPoint: defaultScenePoint };
                 const dataIsValidDC = await handleImageServiceRequest(
                     eventForDC,
                     selectedVariable,
@@ -513,6 +524,11 @@ export default function Home() {
                 isOpen={isShareMenuOpen}
                 onClose={() => setIsShareMenuOpen(false)}
             />
+
+            <div
+                id="blur-overlay"
+                className="blur-overlay bg-black bg-opacity-30 backdrop-blur-lg"
+            ></div>
 
             <div ref={mapDiv} style={{ height: '100vh' }}></div>
         </div>

@@ -4,22 +4,62 @@ import crosshairPlugin from 'chartjs-plugin-crosshair';
 import { ChartDataContext } from '../contexts/AppContext';
 import { VideoContext } from '../contexts/VideoContext';
 import { FPS } from '../utils/constants';
+import { getTemperatureColor } from '../utils/colors';
 
 export default function LineChart({ selectedIndex }) {
     const { chartData } = useContext(ChartDataContext);
-    const { currentFrame, isPlaying, setIsPlaying } = useContext(VideoContext);
+    const { currentFrame, videoRefs, setCurrentFrame } =
+        useContext(VideoContext);
     const chartRef = useRef(null);
     const chartInstanceRef = useRef(null);
+    const yAxisChartRef = useRef(null);
+    const yAxisChartInstanceRef = useRef(null);
     const [loading, setLoading] = useState(true);
-    const [wasPlaying, setWasPlaying] = useState(false);
 
     useEffect(() => {
-        if (chartRef.current && chartData.length > 0) {
+        if (chartRef.current && yAxisChartRef.current && chartData.length > 0) {
             const ctx = chartRef.current.getContext('2d');
+            const yAxisCtx = yAxisChartRef.current.getContext('2d');
 
             if (chartInstanceRef.current) {
                 chartInstanceRef.current.destroy();
             }
+
+            if (yAxisChartInstanceRef.current) {
+                yAxisChartInstanceRef.current.destroy();
+            }
+
+            const createTemperatureGradient = (ctx, data, units = 'F') => {
+                const gradient = ctx.createLinearGradient(
+                    0,
+                    0,
+                    chartRef.current.width,
+                    0
+                );
+                data.forEach((temperature, index) => {
+                    const position = index / (data.length - 1);
+                    const color = getTemperatureColor(temperature, units);
+                    gradient.addColorStop(position, color);
+                });
+                return gradient;
+            };
+
+            const ssp126Gradient = createTemperatureGradient(
+                ctx,
+                chartData.map((data) => data.tasmax_ssp126)
+            );
+            const ssp245Gradient = createTemperatureGradient(
+                ctx,
+                chartData.map((data) => data.tasmax_ssp245)
+            );
+            const ssp370Gradient = createTemperatureGradient(
+                ctx,
+                chartData.map((data) => data.tasmax_ssp370)
+            );
+            const ssp585Gradient = createTemperatureGradient(
+                ctx,
+                chartData.map((data) => data.tasmax_ssp585)
+            );
 
             if (ctx) {
                 chartInstanceRef.current = new Chart(ctx, {
@@ -34,12 +74,11 @@ export default function LineChart({ selectedIndex }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 0
-                                        ? 'steelblue'
+                                        ? ssp126Gradient
                                         : 'rgba(239, 239, 240, 0.2)',
-                                borderWidth: selectedIndex === 0 ? 2 : 0.5,
+                                borderWidth: selectedIndex === 0 ? 1 : 0.5,
                                 fill: false,
-                                pointRadius: 0,
-                                borderWidth: 1
+                                pointRadius: 0
                             },
                             {
                                 label: 'SSP245',
@@ -48,12 +87,11 @@ export default function LineChart({ selectedIndex }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 1
-                                        ? 'green'
+                                        ? ssp245Gradient
                                         : 'rgba(239, 239, 240, 0.2)',
-                                borderWidth: selectedIndex === 1 ? 2 : 0.5,
+                                borderWidth: selectedIndex === 1 ? 1 : 0.5,
                                 fill: false,
-                                pointRadius: 0,
-                                borderWidth: 1
+                                pointRadius: 0
                             },
                             {
                                 label: 'SSP370',
@@ -62,12 +100,11 @@ export default function LineChart({ selectedIndex }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 2
-                                        ? 'orange'
+                                        ? ssp370Gradient
                                         : 'rgba(239, 239, 240, 0.2)',
-                                borderWidth: selectedIndex === 2 ? 2 : 0.5,
+                                borderWidth: selectedIndex === 2 ? 1 : 0.5,
                                 fill: false,
-                                pointRadius: 0,
-                                borderWidth: 1
+                                pointRadius: 0
                             },
                             {
                                 label: 'SSP585',
@@ -76,12 +113,11 @@ export default function LineChart({ selectedIndex }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 3
-                                        ? 'red'
+                                        ? ssp585Gradient
                                         : 'rgba(239, 239, 240, 0.2)',
-                                borderWidth: selectedIndex === 2 ? 2 : 0.5,
+                                borderWidth: selectedIndex === 3 ? 1 : 0.5,
                                 fill: false,
-                                pointRadius: 0,
-                                borderWidth: 1
+                                pointRadius: 0
                             }
                         ]
                     },
@@ -89,6 +125,13 @@ export default function LineChart({ selectedIndex }) {
                         responsive: true,
                         animation: false,
                         maintainAspectRatio: false,
+                        events: [],
+                        layout: {
+                            padding: {
+                                left: 23,
+                                right: 20
+                            }
+                        },
                         interaction: {
                             intersect: false,
                             mode: 'index'
@@ -104,14 +147,10 @@ export default function LineChart({ selectedIndex }) {
                                 }
                             },
                             y: {
+                                display: false,
                                 grid: {
                                     color: 'rgba(255, 255, 255, 0.1)'
-                                },
-                                ticks: {
-                                    color: 'white',
-                                    maxTicksLimit: 10
-                                },
-                                beginAtZero: false
+                                }
                             }
                         },
                         plugins: {
@@ -208,6 +247,86 @@ export default function LineChart({ selectedIndex }) {
                     ]
                 });
 
+                /**
+                 * This chart instance is only used to display sticky Y-axis labels on the left-hand side of the chart
+                 * No data points or lines are shown in this chart. Its purpose is to maintain fixed Y-axis labels
+                 * that align with the main chart as the user horizontally scrolls the main chart on mobiles.
+                 */
+                yAxisChartInstanceRef.current = new Chart(yAxisCtx, {
+                    type: 'line',
+                    data: {
+                        labels: chartData.map((data) => data.x),
+                        datasets: [
+                            {
+                                label: 'SSP126',
+                                data: chartData.map(
+                                    (data) => data.tasmax_ssp126
+                                ),
+                                borderWidth: 0,
+                                fill: false,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'SSP245',
+                                data: chartData.map(
+                                    (data) => data.tasmax_ssp245
+                                ),
+                                borderWidth: 0,
+                                fill: false,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'SSP370',
+                                data: chartData.map(
+                                    (data) => data.tasmax_ssp370
+                                ),
+                                borderWidth: 0,
+                                fill: false,
+                                pointRadius: 0
+                            },
+                            {
+                                label: 'SSP585',
+                                data: chartData.map(
+                                    (data) => data.tasmax_ssp585
+                                ),
+                                borderWidth: 0,
+                                fill: false,
+                                pointRadius: 0
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        animation: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            },
+                            tooltip: {
+                                enabled: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)',
+                                    drawOnChartArea: false,
+                                    drawTicks: false
+                                },
+                                ticks: {
+                                    color: 'white',
+                                    maxTicksLimit: 5
+                                },
+                                beginAtZero: false
+                            },
+                            x: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+
                 setLoading(false);
             }
         }
@@ -220,6 +339,16 @@ export default function LineChart({ selectedIndex }) {
         };
     }, [chartData, selectedIndex]);
 
+    /**
+     * We are manually updating the chart's vertical line to display the current frame's data point.
+     * Like this, the chart's tooltip is in sync with the video playback by highlighting the appropriate point on the chart.
+     *
+     * The way it works:
+     * 1. The `chartData` array holds all the data points plotted on the chart
+     * 2. The `currentFrame` is the current point in the video playback, and we use it to determine which point on the chart corresponds to this frame
+     * 3. The `selectedIndex` represents the dataset currently being displayed (e.g., SSP126, SSP245)
+     *
+     */
     useEffect(() => {
         if (chartData.length > 0) {
             const updateChartLineManually = () => {
@@ -258,21 +387,125 @@ export default function LineChart({ selectedIndex }) {
         }
     }, [chartData, currentFrame, selectedIndex]);
 
+    useEffect(() => {
+        const canvas = chartRef.current;
+
+        const handleClick = (event) => {
+            const chart = chartInstanceRef.current;
+            const points = chart.getElementsAtEventForMode(
+                event,
+                'nearest',
+                { intersect: false },
+                true
+            );
+            if (points.length) {
+                const index = points[0].index;
+                const newFrame = index * FPS;
+                setCurrentFrame(newFrame);
+                videoRefs.current.forEach(
+                    (video) => (video.currentTime = newFrame / FPS)
+                );
+            }
+        };
+
+        canvas.addEventListener('click', handleClick);
+
+        return () => {
+            canvas.removeEventListener('click', handleClick);
+        };
+    }, [chartData, currentFrame]);
+
+    /**
+     * This effect adds touch event handlers for touch interactions on the chart
+     * It handles touch-based interactions like selecting a point on the line chart
+     *
+     * We are following two specific rules here:
+     * 1. When dragging or horizontally scrolling the chart on mobile, the selected point must not be updated and,
+     * 2. When only tapping on the chart (without dragging) the selected point will be updated (the vertical line will move to the tapped location)
+     *
+     * - `touchstart` - The start of a touch interaction and disables other events (like hovering)
+     * - `touchmove` - Detects if the user is dragging so we can differentiate between a tap and a drag
+     * - `touchend` - If no drag occurs, we handle the touch like a click (e.g., selecting the nearest point on the chart)
+     * After the touch ends, we re-enable tooltips and chart interactions.
+     */
+    useEffect(() => {
+        const canvas = chartRef.current;
+        let isDragging = false;
+
+        const handleTouchStart = () => {
+            isDragging = false;
+            if (chartInstanceRef.current) {
+                chartInstanceRef.current.options.events = [];
+            }
+        };
+
+        const handleTouchMove = () => {
+            isDragging = true;
+        };
+
+        const handleTouchEnd = (event) => {
+            if (!isDragging) {
+                const chart = chartInstanceRef.current;
+                const points = chart.getElementsAtEventForMode(
+                    event,
+                    'nearest',
+                    { intersect: false },
+                    true
+                );
+                if (points.length) {
+                    const index = points[0].index;
+                    setCurrentFrame(index * FPS);
+                }
+            }
+
+            if (chartInstanceRef.current) {
+                chartInstanceRef.current.options.plugins.tooltip.enabled = true;
+                chartInstanceRef.current.options.interaction.mode = 'index';
+                chartInstanceRef.current.update();
+            }
+        };
+
+        canvas.addEventListener('touchstart', handleTouchStart);
+        canvas.addEventListener('touchmove', handleTouchMove);
+        canvas.addEventListener('touchend', handleTouchEnd);
+
+        return () => {
+            canvas.removeEventListener('touchstart', handleTouchStart);
+            canvas.removeEventListener('touchmove', handleTouchMove);
+            canvas.removeEventListener('touchend', handleTouchEnd);
+        };
+    }, [chartData, currentFrame]);
+
     return (
         <div
-            style={{
-                position: 'relative'
-            }}
+            style={{ position: 'relative', overflow: 'hidden' }}
             className="h-[150px] md:h-[200px]"
-            onMouseEnter={() => {
-                setWasPlaying(isPlaying);
-                setIsPlaying(false);
-            }}
-            onMouseLeave={() => {
-                if (wasPlaying) setIsPlaying(true);
-            }}
         >
-            <canvas ref={chartRef} style={{ width: '100%' }}></canvas>
+            <div
+                style={{
+                    overflow: 'hidden',
+                    height: '100%'
+                }}
+                className="y-axis-canvas"
+            >
+                <canvas
+                    style={{
+                        width: '100%',
+                        position: 'absolute',
+                        top: 0
+                    }}
+                    ref={yAxisChartRef}
+                ></canvas>
+            </div>
+            <canvas
+                ref={chartRef}
+                className="main-chart-canvas"
+                style={{
+                    width: '100%',
+                    position: 'absolute',
+                    top: 0
+                }}
+            ></canvas>
             {loading && (
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-full h-1/4 bg-neutral-950 bg-opacity-90 rounded-md animate-pulse"></div>
