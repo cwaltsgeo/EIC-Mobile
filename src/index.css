@@ -15,7 +15,7 @@
 }
 
 .esri-attribution {
-    position: fixed;
+    position: fixed !important;
     background: transparent;
     z-index: 5 !important;
 
