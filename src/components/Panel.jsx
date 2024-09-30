@@ -93,9 +93,7 @@ export default function Panel() {
             const dataForYear = chartData.find(
                 (data) => data.x === String(year)
             );
-            const value = dataForYear
-                ? Math.ceil(dataForYear[selectedVarKey])
-                : 'N/A';
+            const value = dataForYear ? dataForYear[selectedVarKey] : 'N/A';
 
             const color = hexColors[index % hexColors.length];
 
@@ -188,7 +186,7 @@ export default function Panel() {
                                 </div>
 
                                 {/* Play/Pause Button */}
-                                <div className="md:ml-auto absolute md:relative top-[-55px] left-[10px] md:top-auto md:left-auto">
+                                <div className="md:ml-auto absolute md:relative top-[-70px] left-[10px] md:top-auto md:left-auto">
                                     <div
                                         className="bg-blue-600 text-white cursor-pointer rounded-full p-2 border border-white/15"
                                         style={{
@@ -280,6 +278,7 @@ export default function Panel() {
                                             selectedIndex={
                                                 selectedVariableIndex
                                             }
+                                            isFahrenheit={isFahrenheit}
                                         />
                                     </div>
                                 </div>

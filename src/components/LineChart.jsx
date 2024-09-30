@@ -5,8 +5,9 @@ import { ChartDataContext } from '../contexts/AppContext';
 import { VideoContext } from '../contexts/VideoContext';
 import { FPS } from '../utils/constants';
 import { getTemperatureColor } from '../utils/colors';
+import { convertToCelsius } from '../utils/helpers';
 
-export default function LineChart({ selectedIndex }) {
+export default function LineChart({ selectedIndex, isFahrenheit }) {
     const { chartData } = useContext(ChartDataContext);
     const { currentFrame, videoRefs, setCurrentFrame } =
         useContext(VideoContext);
@@ -169,14 +170,18 @@ export default function LineChart({ selectedIndex }) {
                                     label: function (tooltipItem) {
                                         const datasetIndex =
                                             tooltipItem.datasetIndex;
+                                        const value = tooltipItem.raw;
+
                                         if (datasetIndex === selectedIndex) {
-                                            return (
-                                                Math.round(
-                                                    tooltipItem.raw * 100
-                                                ) /
-                                                    100 +
-                                                ' °F'
-                                            );
+                                            if (isFahrenheit) {
+                                                return `${Math.trunc(
+                                                    value
+                                                )} °F`;
+                                            } else {
+                                                return `${Math.trunc(
+                                                    convertToCelsius(value)
+                                                )} °C`;
+                                            }
                                         }
                                         return '';
                                     }
@@ -316,7 +321,14 @@ export default function LineChart({ selectedIndex }) {
                                 },
                                 ticks: {
                                     color: 'white',
-                                    maxTicksLimit: 5
+                                    maxTicksLimit: 5,
+                                    callback: (value) => {
+                                        return isFahrenheit
+                                            ? `${Math.trunc(value)}`
+                                            : `${Math.trunc(
+                                                  convertToCelsius(value)
+                                              )}`;
+                                    }
                                 },
                                 beginAtZero: false
                             },
@@ -329,6 +341,21 @@ export default function LineChart({ selectedIndex }) {
 
                 setLoading(false);
             }
+
+            const updateYAxis = (chart) => {
+                const yAxis = chart.options.scales.y;
+                yAxis.ticks.callback = (value) => {
+                    return isFahrenheit
+                        ? `${Math.trunc(value)}`
+                        : `${Math.trunc(convertToCelsius(value))}`;
+                };
+            };
+
+            updateYAxis(chartInstanceRef.current);
+            updateYAxis(yAxisChartInstanceRef.current);
+
+            chartInstanceRef.current.update();
+            yAxisChartInstanceRef.current.update();
         }
 
         return () => {
@@ -337,7 +364,7 @@ export default function LineChart({ selectedIndex }) {
                 chartInstanceRef.current = null;
             }
         };
-    }, [chartData, selectedIndex]);
+    }, [chartData, selectedIndex, isFahrenheit]);
 
     /**
      * We are manually updating the chart's vertical line to display the current frame's data point.

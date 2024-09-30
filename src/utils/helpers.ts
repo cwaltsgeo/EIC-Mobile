@@ -6,10 +6,12 @@ export const isMobileDevice = () => {
 };
 
 export const convertToCelsius = (fahrenheit) => {
-    return (((fahrenheit - 32) * 5) / 9).toFixed(0);
+    return ((fahrenheit - 32) * 5) / 9;
 };
 
 export const convertTemperature = (value, isFahrenheit) => {
     if (value === 'N/A') return value;
-    return isFahrenheit ? value.toFixed(0) : convertToCelsius(value);
+    return isFahrenheit
+        ? Math.trunc(value)
+        : Math.trunc(convertToCelsius(value));
 };
