@@ -56,8 +56,10 @@ export default function Home() {
 
     const [showTransition, setShowTransition] = useState(true);
     const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
+    const [isBlurActive, setIsBlurActive] = useState(false);
 
     const mapDiv = useRef(null);
+    const blurOverlayRef = useRef(null);
 
     let draggingInsideBuffer = false;
     let initialCamera;
@@ -74,7 +76,7 @@ export default function Home() {
     };
 
     const createBuffer = async (point, pointLayer, bufferLayer) => {
-        const sideLength = 7;
+        const sideLength = 10;
 
         const squarePolygon = {
             type: 'polygon',
@@ -222,7 +224,6 @@ export default function Home() {
                     variable.video
                 );
 
-                console.log('ovde ', videoRefs);
                 element.when(() => {
                     const videoElement = element.content;
                     videoRefs.current[videoIndex] = videoElement;
@@ -320,8 +321,10 @@ export default function Home() {
 
         searchExpand.watch('expanded', (isExpanded) => {
             if (isExpanded) {
+                setIsBlurActive(true);
                 blurOverlay.classList.add('active');
             } else {
+                setIsBlurActive(false);
                 blurOverlay.classList.remove('active');
             }
         });
@@ -499,6 +502,18 @@ export default function Home() {
         };
     }, [isPlaying, videoRefs, setCurrentFrame]);
 
+    // (sigh) We need the blur overlay to make the search more prominent, but the map attributions
+    // still show up on top of the blur. To avoid that, we manually hide the attributions when
+    // the blur is active, and bring them back once the blur is off.
+    useEffect(() => {
+        const attribution = document.querySelector('.esri-attribution');
+        if ((isBlurActive || showTransition) && attribution) {
+            attribution.style.display = 'none';
+        } else if (attribution) {
+            attribution.style.display = 'flex';
+        }
+    }, [isBlurActive, showTransition]);
+
     return (
         <div>
             <Transition
@@ -522,6 +537,7 @@ export default function Home() {
 
             <div
                 id="blur-overlay"
+                ref={blurOverlayRef}
                 className="blur-overlay bg-black bg-opacity-30 backdrop-blur-lg"
             ></div>
 

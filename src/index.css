@@ -16,6 +16,7 @@
 
 .esri-attribution {
     background: transparent;
+    z-index: 5 !important;
 
     @media screen and (max-width: 1024px) {
         bottom: 381px !important;
