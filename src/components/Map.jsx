@@ -15,7 +15,11 @@ import SceneView from '@arcgis/core/views/SceneView';
 import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
 import { VideoContext } from '../contexts/VideoContext';
-import { ChartDataContext, MapViewContext } from '../contexts/AppContext';
+import {
+    ChartDataContext,
+    MapViewContext,
+    ErrorContext
+} from '../contexts/AppContext';
 import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync';
 import { handleImageServiceRequest } from '../utils/utils';
 import { FPS, FRAME_DURATION, TOTAL_FRAMES } from '../utils/constants';
@@ -50,6 +54,7 @@ const createFeatureLayer = (url) =>
 export default function Home() {
     const { videoRefs, currentFrame, setCurrentFrame, isPlaying } =
         useContext(VideoContext);
+    const { setHasWebGLError } = useContext(ErrorContext);
     const { mapView, setMapView } = useContext(MapViewContext);
     const { setChartData } = useContext(ChartDataContext);
     const { dataSelection } = useContext(DataSelectionContext);
@@ -315,6 +320,10 @@ export default function Home() {
                     await handleMapClick({ mapPoint }, view);
                 }
             });
+        }).catch((error) => {
+            if (error.name.includes('webgl')) {
+                setHasWebGLError(true);
+            }
         });
 
         const searchWidget = new Search({ view, popupEnabled: false });
@@ -391,7 +400,7 @@ export default function Home() {
                 view.destroy();
             }
         };
-    }, [setMapView, videoRefs]);
+    }, [setMapView, setHasWebGLError, videoRefs]);
 
     const handleMapClick = async (event, view) => {
         const [_, selectedVariable] = dataSelection;
