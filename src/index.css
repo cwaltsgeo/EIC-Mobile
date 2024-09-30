@@ -10,6 +10,10 @@
  * Tailwind CSS like the rest of the components.
  */
 
+ .esri-view {
+    --esri-view-outline: none;
+ }
+
 .esri-ui-top-left {
     display: none;
 }
@@ -23,6 +27,7 @@
         bottom: 0 !important;
     }
 }
+
 
 * {
     font-family: "Manrope", sans-serif;
