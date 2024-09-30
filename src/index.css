@@ -23,6 +23,14 @@
     }
 
     @media screen and (max-width: 768px) {
+        bottom: 380px !important;
+    }
+
+    @media screen and (max-width: 767px) {
+        bottom: 375px !important;
+    }
+
+    @media screen and (max-width: 639px) {
         bottom: 350px !important;
     }
 }
