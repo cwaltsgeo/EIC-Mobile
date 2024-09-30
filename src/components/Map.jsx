@@ -458,12 +458,6 @@ export default function Home() {
         let animationFrameId;
 
         const playVideoManually = (timestamp) => {
-            videoRefs.current.forEach((videoElement) => {
-                if (videoElement && !videoElement.paused) {
-                    videoElement.pause();
-                }
-            });
-
             if (!lastFrameTime) {
                 lastFrameTime = timestamp;
             }
