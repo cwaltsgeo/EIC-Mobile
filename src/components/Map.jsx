@@ -224,12 +224,16 @@ export default function Home() {
                     variable.video
                 );
 
-                element.when(() => {
-                    const videoElement = element.content;
-                    videoRefs.current[videoIndex] = videoElement;
-                    videoElement.currentTime = currentFrame;
-                    videoIndex++;
-                });
+                element
+                    .when(() => {
+                        const videoElement = element.content;
+                        videoRefs.current[videoIndex] = videoElement;
+                        videoElement.currentTime = currentFrame;
+                        videoIndex++;
+                    })
+                    .catch((error) => {
+                        console.error('Failed to load video element', error);
+                    });
             });
         });
 
