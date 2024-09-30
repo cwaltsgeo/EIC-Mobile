@@ -33,6 +33,10 @@
     @media screen and (max-width: 639px) {
         bottom: 350px !important;
     }
+
+    @media screen and (max-width: 344px) {
+        bottom: 370px !important;
+    }
 }
 
 * {
