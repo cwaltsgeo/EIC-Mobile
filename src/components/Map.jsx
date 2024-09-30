@@ -228,6 +228,12 @@ export default function Home() {
                     .when(() => {
                         const videoElement = element.content;
                         videoRefs.current[videoIndex] = videoElement;
+
+                        console.log(
+                            `Video initialized for: ${variable.name}`,
+                            videoUrl
+                        );
+
                         videoElement.currentTime = currentFrame;
                         videoIndex++;
                     })

@@ -186,7 +186,7 @@ export default function Panel() {
                                 </div>
 
                                 {/* Play/Pause Button */}
-                                <div className="md:ml-auto absolute md:relative top-[-70px] left-[10px] md:top-auto md:left-auto">
+                                <div className="md:ml-auto absolute md:relative top-[-50px] left-[10px] md:top-auto md:left-auto">
                                     <div
                                         className="bg-blue-600 text-white cursor-pointer rounded-full p-2 border border-white/15"
                                         style={{
