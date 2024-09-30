@@ -261,6 +261,9 @@ export default function Home() {
                 altitude: {
                     min: 2000000
                 }
+            },
+            padding: {
+                bottom: 100
             }
         });
 
