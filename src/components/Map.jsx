@@ -568,7 +568,7 @@ export default function Home() {
                 leaveFrom="opacity-100"
                 leaveTo="opacity-0"
             >
-                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-90">
+                <div className="fixed inset-0 z-[99999] flex items-center justify-center bg-black bg-opacity-100">
                     <div className="w-16 h-16 border-4 border-t-transparent border-white rounded-full animate-spin"></div>
                 </div>
             </Transition>
