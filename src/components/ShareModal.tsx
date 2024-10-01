@@ -3,7 +3,7 @@ import { Dialog, DialogPanel, DialogTitle, Transition, TransitionChild } from '@
 import { Fragment } from 'react';
 import { FacebookShareButton, TwitterShareButton, LinkedinShareButton, EmailShareButton, WhatsappShareButton } from 'react-share';
 import { FacebookIcon, TwitterIcon, LinkedinIcon, EmailIcon, WhatsappIcon } from 'react-share';
-
+import { ClipboardDocumentIcon } from '@heroicons/react/24/outline'; // Importing the HeroIcons Clipboard icon
 
 interface ShareModalProps {
   isOpen: boolean;
@@ -11,6 +11,11 @@ interface ShareModalProps {
 }
 
 export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(window.location.href);
+    onClose();
+  };
+
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-10" onClose={onClose}>
@@ -57,6 +62,14 @@ export const ShareModal: React.FC<ShareModalProps> = ({ isOpen, onClose }) => {
                   <WhatsappShareButton url={window.location.href}>
                     <WhatsappIcon size={40} round />
                   </WhatsappShareButton>
+
+                  <button
+                    onClick={handleCopyLink}
+                    className="bg-gray-200 rounded-full p-2 hover:bg-gray-300 transition"
+                    aria-label="Copy link"
+                  >
+                    <ClipboardDocumentIcon className="h-7 w-7 text-gray-700" />
+                  </button>
                 </div>
               </DialogPanel>
             </TransitionChild>
