@@ -39,16 +39,14 @@ export default function DataLayerModal({
                 </button>
 
                 <h2 className="text-[20px] font-bold text-white mb-8 text-center leading-[27.32px] md:text-[28px] md:leading-[36px]">
-                    Average high temperature of the hottest month of the year
+                Annual maximum air temperature
                 </h2>
 
                 <div className="w-full max-w-[760px] bg-transparent">
                     <p className="text-[16px] text-gray-300 text-left mb-6 leading-[24px]">
-                        What would be the average high temperature of the hottest month of the year, under different greenhouse gas emission scenarios?
-                    </p>
+                        How hot could it get on the hottest day in a given year, under different greenhouse gas emission scenarios?                    </p>
                     <p className="text-[16px] text-gray-300 text-left mb-6 leading-[24px]">
-                        See estimates of average maximum temperature of the hottest month of the year using the TASMAX variable from NASA Earth Exchange (NEX) Global Daily Downscaled Projections (GDDP) based on simulations of the Coupled Model Intercomparison Project Phase 6 (CMIP6).
-                    </p>
+                            See estimates of annual maxima of daily maximum near-surface air temperature (TASMAX) from NASA Earth Exchange (NEX) Global Daily Downscaled Projections (GDDP) based on simulations of the Coupled Model Intercomparison Project Phase 6 (CMIP6).                    </p>
 
                     <div className="flex justify-start mt-8">
                         <button
