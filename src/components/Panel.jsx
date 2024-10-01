@@ -14,6 +14,7 @@ import DataLayerModal from './DataLayerModal';
 import { getTemperatureColor, hexColors } from '../utils/colors';
 import { ArrowRightIcon } from '@heroicons/react/24/outline';
 import { convertTemperature } from '../utils/helpers';
+import { getTextColor } from '../utils/colors';
 
 export default function Panel() {
     const {
@@ -135,7 +136,7 @@ export default function Panel() {
             {!isModalOpen && (
                 <div className="fixed bottom-0 left-1/2 transform -translate-x-1/2 shadow-lg z-10 flex w-full lg:w-[762px] max-w-none max-h-none">
                     <div style={{ width: '100%', height: '100%' }}>
-                        <div className="flex flex-col w-full h-full bg-black bg-opacity-70 shadow-lg backdrop-blur-lg p-3 sm:p-6 gap-5">
+                        <div className="flex flex-col w-full h-full bg-black bg-opacity-70 shadow-lg backdrop-blur-lg p-2 sm:p-6 gap-3">
                             <div className="flex justify-between items-center w-full">
                                 <div className="flex gap-2 items-center w-full md:w-auto">
                                     <div className="flex flex-col items-start md:items-center w-1/2 md:w-auto md:flex-row">
@@ -146,7 +147,7 @@ export default function Panel() {
                                             onClick={() =>
                                                 setIsDataLayerModalOpen(true)
                                             }
-                                            className="px-4 py-2 flex justify-between items-center text-white bg-blue-600 text-[12px] font-semibold border border-white/15 w-full md:w-auto"
+                                            className="px-4 py-2 flex justify-between items-center text-white bg-[#14367D] text-[12px] font-semibold border border-white/15 w-full md:w-auto"
                                             style={{
                                                 border: '1px solid #FFFFFF26',
                                                 minWidth: '149px',
@@ -164,7 +165,7 @@ export default function Panel() {
                                         </span>
                                         <button
                                             onClick={() => setIsModalOpen(true)}
-                                            className="px-4 py-2 flex justify-between items-center text-white bg-blue-600 text-[12px] font-semibold border border-white/15 w-full md:w-auto"
+                                            className="px-4 py-2 flex justify-between items-center text-white bg-[#14367D] text-[12px] font-semibold border border-white/15 w-full md:w-auto"
                                             style={{
                                                 border: '1px solid #FFFFFF26',
                                                 minWidth: '149px',
@@ -188,7 +189,7 @@ export default function Panel() {
                                 {/* Play/Pause Button */}
                                 <div className="md:ml-auto absolute md:relative top-[-50px] left-[10px] md:top-auto md:left-auto">
                                     <div
-                                        className="bg-blue-600 text-white cursor-pointer rounded-full p-2 border border-white/15"
+                                        className="bg-[#14367D] text-white cursor-pointer rounded-full p-2 border border-white/15"
                                         style={{
                                             border: '1px solid #FFFFFF26'
                                         }}
@@ -225,7 +226,7 @@ export default function Panel() {
                                                         <div className="bg-blue-600 bg-opacity-90 rounded"></div>
                                                     ) : (
                                                         <div
-                                                            className="flex flex-col items-center justify-center py-1 px-2 bg-neutral-800 rounded-sm cursor-pointer"
+                                                            className="flex flex-col items-center justify-center cursor-pointer"
                                                             onClick={() =>
                                                                 handleYearClick(
                                                                     item.year
@@ -233,13 +234,22 @@ export default function Panel() {
                                                             }
                                                         >
                                                             <div
-                                                                className="flex items-baseline"
+                                                                className="flex items-baseline py-1 px-2 rounded-md"
                                                                 style={{
-                                                                    color: getTemperatureColor(
-                                                                        item.value,
-                                                                        isFahrenheit
-                                                                            ? 'F'
-                                                                            : 'C'
+                                                                    backgroundColor:
+                                                                        getTemperatureColor(
+                                                                            item.value,
+                                                                            isFahrenheit
+                                                                                ? 'F'
+                                                                                : 'C'
+                                                                        ),
+                                                                    color: getTextColor(
+                                                                        getTemperatureColor(
+                                                                            item.value,
+                                                                            isFahrenheit
+                                                                                ? 'F'
+                                                                                : 'C'
+                                                                        )
                                                                     )
                                                                 }}
                                                             >
@@ -260,7 +270,7 @@ export default function Panel() {
                                                                         : 'C'}
                                                                 </span>
                                                             </div>
-                                                            <span className="text-white text-xs">
+                                                            <span className="text-white text-xs mt-1">
                                                                 {item.year}
                                                             </span>
                                                         </div>

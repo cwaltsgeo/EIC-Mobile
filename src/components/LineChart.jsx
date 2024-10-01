@@ -45,23 +45,6 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                 return gradient;
             };
 
-            const ssp126Gradient = createTemperatureGradient(
-                ctx,
-                chartData.map((data) => data.tasmax_ssp126)
-            );
-            const ssp245Gradient = createTemperatureGradient(
-                ctx,
-                chartData.map((data) => data.tasmax_ssp245)
-            );
-            const ssp370Gradient = createTemperatureGradient(
-                ctx,
-                chartData.map((data) => data.tasmax_ssp370)
-            );
-            const ssp585Gradient = createTemperatureGradient(
-                ctx,
-                chartData.map((data) => data.tasmax_ssp585)
-            );
-
             if (ctx) {
                 chartInstanceRef.current = new Chart(ctx, {
                     type: 'line',
@@ -75,7 +58,7 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 0
-                                        ? ssp126Gradient
+                                        ? '#FFFFFFBF'
                                         : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 0 ? 1 : 0.5,
                                 fill: false,
@@ -88,7 +71,7 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 1
-                                        ? ssp245Gradient
+                                        ? '#FFFFFFBF'
                                         : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 1 ? 1 : 0.5,
                                 fill: false,
@@ -101,7 +84,7 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 2
-                                        ? ssp370Gradient
+                                        ? '#FFFFFFBF'
                                         : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 2 ? 1 : 0.5,
                                 fill: false,
@@ -114,7 +97,7 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                                 ),
                                 borderColor:
                                     selectedIndex === 3
-                                        ? ssp585Gradient
+                                        ? '#FFFFFFBF'
                                         : 'rgba(239, 239, 240, 0.2)',
                                 borderWidth: selectedIndex === 3 ? 1 : 0.5,
                                 fill: false,
@@ -148,9 +131,15 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                                 }
                             },
                             y: {
-                                display: false,
+                                display: true,
                                 grid: {
-                                    color: 'rgba(255, 255, 255, 0.1)'
+                                    color: 'rgba(255, 255, 255, 0.1)',
+                                    drawTicks: false,
+                                    drawOnChartArea: true
+                                },
+                                ticks: {
+                                    display: false,
+                                    maxTicksLimit: 5
                                 }
                             }
                         },
@@ -160,7 +149,7 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                             },
                             tooltip: {
                                 backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                                titleColor: '#FFD700',
+                                titleColor: '#FFFFFF',
                                 bodyColor: '#FFFFFF',
                                 displayColors: false,
                                 callbacks: {
@@ -217,6 +206,17 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                                         chart.tooltip._active[0];
                                     const ctx = chart.ctx;
                                     const x = activePoint.element.x;
+                                    const y = activePoint.element.y;
+                                    const dataset =
+                                        chart.data.datasets[
+                                            activePoint.datasetIndex
+                                        ];
+                                    const temperature =
+                                        dataset.data[activePoint.index];
+                                    const color = getTemperatureColor(
+                                        temperature,
+                                        'F'
+                                    );
                                     const topY = chart.scales.y.top;
                                     const bottomY = chart.scales.y.bottom;
 
@@ -224,6 +224,16 @@ export default function LineChart({ selectedIndex, isFahrenheit }) {
                                     ctx.beginPath();
                                     ctx.moveTo(x, topY);
                                     ctx.lineTo(x, bottomY);
+                                    ctx.lineWidth = 1;
+                                    ctx.strokeStyle = '#FFFFFF';
+                                    ctx.stroke();
+                                    ctx.restore();
+
+                                    ctx.save();
+                                    ctx.beginPath();
+                                    ctx.arc(x, y, 5, 0, 2 * Math.PI);
+                                    ctx.fillStyle = color;
+                                    ctx.fill();
                                     ctx.lineWidth = 1;
                                     ctx.strokeStyle = '#FFFFFF';
                                     ctx.stroke();

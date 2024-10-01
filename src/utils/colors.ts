@@ -299,3 +299,15 @@ export const getTemperatureColor = (temperature, units = 'F') => {
 
     return fullColors[colorIndex];
 };
+
+export const getTextColor = (hexColor) => {
+    const rgb = parseInt(hexColor.slice(1), 16);
+    const r = (rgb >> 16) & 255;
+    const g = (rgb >> 8) & 255;
+    const b = rgb & 255;
+
+    const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+
+    // Luminance < 128 means the color is considered dark, so we return a white text
+    return luminance < 128 ? '#FFFFFF' : '#01112D';
+};

@@ -46,15 +46,19 @@
     width: 70px;
     z-index: 9;
     position: fixed;
-    bottom: 15px;
+    bottom: 10px;
     height: 200px !important;
     pointer-events: none;
     left: 23px;
 
     @media screen and (max-width: 768px) {
         height: 150px !important;
-        bottom: 25px;
+        bottom: 30px;
         left: 10px;
+    }
+
+    @media screen and (max-width: 640px) {
+        bottom: 15px !important;
     }
 }
 
@@ -95,3 +99,21 @@
 .esri-ui {
     z-index: 99;
 }
+
+
+.chartjs-tooltip {
+    position: fixed;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    padding: 8px;
+    border-radius: 4px;
+    pointer-events: none;
+    transform: translate(-50%, 0);
+    transition: all 0.1s ease;
+    white-space: nowrap;
+  }
+
+  .chartjs-tooltip-hidden {
+    opacity: 0;
+    visibility: hidden;
+  }
