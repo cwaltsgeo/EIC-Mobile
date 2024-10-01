@@ -11,6 +11,7 @@ import Extent from '@arcgis/core/geometry/Extent';
 import MediaLayer from '@arcgis/core/layers/MediaLayer';
 import ExtentAndRotationGeoreference from '@arcgis/core/layers/support/ExtentAndRotationGeoreference';
 import VideoElement from '@arcgis/core/layers/support/VideoElement';
+import ImageElement from '@arcgis/core/layers/support/ImageElement';
 import SceneView from '@arcgis/core/views/SceneView';
 import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
@@ -202,6 +203,8 @@ export default function Home() {
                     ? variable.mobileVideo
                     : variable.video;
 
+                const fallbackImageUrl = variable.fallbackImage;
+
                 const element = new VideoElement({
                     video: videoUrl,
                     georeference: new ExtentAndRotationGeoreference({
@@ -214,8 +217,22 @@ export default function Home() {
                     })
                 });
 
+                // We will use the first frame of each video as a fallback image
+                // in case the video fails to load
+                const imageElement = new ImageElement({
+                    image: fallbackImageUrl,
+                    georeference: new ExtentAndRotationGeoreference({
+                        extent: new Extent({
+                            xmin: -180,
+                            ymin: -90,
+                            xmax: 180,
+                            ymax: 90
+                        })
+                    })
+                });
+
                 const mediaLayer = new MediaLayer({
-                    source: [element],
+                    source: [imageElement, element],
                     title: variable.name,
                     zIndex: index,
                     opacity: variable.name === '126 - Low' ? 1 : 0,
@@ -239,11 +256,14 @@ export default function Home() {
                             videoUrl
                         );
 
+                        imageElement.opacity = 0;
                         videoElement.currentTime = currentFrame;
                         videoIndex++;
                     })
                     .catch((error) => {
                         console.error('Failed to load video element', error);
+
+                        imageElement.opacity = 1;
                     });
             });
         });
