@@ -339,8 +339,6 @@ export default function Home() {
 
         view.ui.add(searchExpand, 'top-right');
 
-        const blurOverlay = blurOverlayRef.current;
-
         searchExpand.watch('expanded', (isExpanded) => {
             const blurOverlay = blurOverlayRef.current;
 
@@ -480,16 +478,6 @@ export default function Home() {
         let animationFrameId;
 
         const playVideoManually = (timestamp) => {
-            videoRefs.current.forEach((videoElement) => {
-                if (
-                    videoElement &&
-                    videoElement.readyState >= 2 &&
-                    !videoElement.paused
-                ) {
-                    videoElement.pause();
-                }
-            });
-
             if (!lastFrameTime) {
                 lastFrameTime = timestamp;
             }
