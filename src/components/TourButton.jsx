@@ -4,7 +4,7 @@ const StyledButton = styled.button`
     position: absolute;
     height: 32px;
     width: 32px;
-    top: 245px;
+    top: 170px;
     right: 15px;
     background-color: #242424;
     color: #adadad;
