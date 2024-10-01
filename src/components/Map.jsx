@@ -246,7 +246,7 @@ export default function Home() {
                 layerList.push(mediaLayer);
 
                 console.log(
-                    `Initializing video for: ${variable.name}`,
+                    `Initializing video for: ${import.meta.env.BASE_URL}${variable.name}`,
                     variable.video
                 );
 
