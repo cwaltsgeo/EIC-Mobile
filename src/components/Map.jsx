@@ -239,8 +239,7 @@ export default function Home() {
                     source: [imageElement, element],
                     title: variable.name,
                     zIndex: index,
-                    opacity: variable.name === '126 - Low' ? 1 : 0,
-                    copyright: "NASA's Goddard Space Flight Center"
+                    opacity: variable.name === '126 - Low' ? 1 : 0
                 });
 
                 layerList.push(mediaLayer);
