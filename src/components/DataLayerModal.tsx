@@ -53,7 +53,7 @@ export default function DataLayerModal({
                     <div className="flex justify-start mt-8">
                         <button
                             className={`px-4 py-2 border rounded-l-lg text-[14px] font-semibold transition-colors ${
-                                isFahrenheit ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400'
+                                isFahrenheit ? 'bg-[#14367D] text-white' : 'bg-gray-800 text-gray-400'
                             }`}
                             style={{
                                 borderRadius: '4px 0 0 4px',
@@ -66,7 +66,7 @@ export default function DataLayerModal({
                         </button>
                         <button
                             className={`px-4 py-2 border rounded-r-lg text-[14px] font-semibold transition-colors ${
-                                !isFahrenheit ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400'
+                                !isFahrenheit ? 'bg-[#14367D] text-white' : 'bg-gray-800 text-gray-400'
                             }`}
                             style={{
                                 borderRadius: '0 4px 4px 0',
