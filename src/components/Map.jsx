@@ -480,6 +480,16 @@ export default function Home() {
         let animationFrameId;
 
         const playVideoManually = (timestamp) => {
+            videoRefs.current.forEach((videoElement) => {
+                if (
+                    videoElement &&
+                    videoElement.readyState >= 2 &&
+                    !videoElement.paused
+                ) {
+                    videoElement.pause();
+                }
+            });
+
             if (!lastFrameTime) {
                 lastFrameTime = timestamp;
             }
@@ -503,6 +513,7 @@ export default function Home() {
                         videoRefs.current.forEach((videoElement) => {
                             if (
                                 videoElement &&
+                                videoElement.readyState >= 2 &&
                                 isSeekable(videoElement, newFrame / FPS)
                             ) {
                                 videoElement.currentTime = newFrame / FPS;
