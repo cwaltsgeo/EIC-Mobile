@@ -7,12 +7,12 @@ import {
     ChartDataContext
 } from '../contexts/AppContext';
 import { VideoContext } from '../contexts/VideoContext';
-import { PlayIcon, PauseIcon } from '@heroicons/react/24/outline';
+import { PlayIcon, PauseIcon } from '@heroicons/react/24/solid';
 import { FPS, TOTAL_FRAMES } from '../utils/constants';
 import ScenarioPickerModal from './ScenarioPickerModal';
 import DataLayerModal from './DataLayerModal';
 import { getTemperatureColor, hexColors } from '../utils/colors';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon } from '@heroicons/react/24/solid';
 import { convertTemperature } from '../utils/helpers';
 import { getTextColor } from '../utils/colors';
 

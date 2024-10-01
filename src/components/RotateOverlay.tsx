@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { DevicePhoneMobileIcon } from '@heroicons/react/24/outline';
+import { DevicePhoneMobileIcon } from '@heroicons/react/24/solid';
 import React from 'react';
 
 const RotateOverlay = () => {

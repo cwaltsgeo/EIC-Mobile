@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { ArrowRightIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon } from '@heroicons/react/24/solid';
 import config from '../config.json';
 
 export default function ScenarioPickerModal({
