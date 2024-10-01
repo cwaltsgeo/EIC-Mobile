@@ -158,7 +158,7 @@ export default function Panel() {
                                         </button>
                                     </div>
 
-                                    <div className="flex flex-col items-start md:items-center w-1/2 md:w-auto md:flex-row md:ml-6">
+                                    <div className="dataset-choice flex flex-col items-start md:items-center w-1/2 md:w-auto md:flex-row md:ml-6">
                                         <span className="text-white opacity-50 font-semibold md:text-center text-left text-[11px] mb-2 md:mb-0 md:mr-2">
                                             GHG Emissions Scenario:
                                         </span>
@@ -206,7 +206,7 @@ export default function Panel() {
                             <div className="w-full border-t border-gray-500"></div>
 
                             {/* Chart */}
-                            <div className="panel-max-values w-full h-[220px] md:h-[250px] flex items-start overflow-x-auto md:overflow-visible">
+                            <div className="chart panel-max-values w-full h-[220px] md:h-[250px] flex items-start overflow-x-auto md:overflow-visible">
                                 <div
                                     className="flex-1"
                                     style={{ minWidth: '600px' }}

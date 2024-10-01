@@ -565,7 +565,7 @@ export default function Home() {
                 className="blur-overlay bg-black bg-opacity-30 backdrop-blur-lg"
             ></div>
 
-            <div ref={mapDiv} style={{ height: '100vh' }}></div>
+            <div className="map" ref={mapDiv} style={{ height: '100vh' }}></div>
         </div>
     );
 }

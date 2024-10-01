@@ -11,6 +11,7 @@ import {
 import { VideoProvider } from './contexts/VideoContext';
 import config from './config.json';
 import RotateOverlay from './components/RotateOverlay';
+import Tour from './components/Tour';
 
 export default function App() {
     const defaultDataset = config.datasets[0];
@@ -42,6 +43,7 @@ export default function App() {
                                 </div>
                             ) : (
                                 <>
+                                    <Tour />
                                     <RotateOverlay />
                                     <EICLogo />
                                     <Panel />
