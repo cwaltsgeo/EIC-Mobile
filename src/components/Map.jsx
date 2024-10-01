@@ -67,6 +67,10 @@ export default function Home() {
     const mapDiv = useRef(null);
     const blurOverlayRef = useRef(null);
 
+    const [allVideosLoaded, setAllVideosLoaded] = useState(false);
+    let totalVideos = 4;
+    let loadedVideos = 0;
+
     let draggingInsideBuffer = false;
     let initialCamera;
     let lastKnownPoint;
@@ -247,10 +251,10 @@ export default function Home() {
                 );
 
                 element
-                    .when(() => {
+                    .when((status) => {
                         const videoElement = element.content;
                         videoRefs.current[videoIndex] = videoElement;
-
+                        loadedVideos++;
                         console.log(
                             `Video initialized for: ${variable.name}`,
                             videoUrl
@@ -259,6 +263,11 @@ export default function Home() {
                         imageElement.opacity = 0;
                         videoElement.currentTime = currentFrame;
                         videoIndex++;
+
+                        console.log(loadedVideos, totalVideos);
+                        if (loadedVideos === totalVideos) {
+                            setAllVideosLoaded(true);
+                        }
                     })
                     .catch((error) => {
                         console.error('Failed to load video element', error);
@@ -492,59 +501,62 @@ export default function Home() {
     }, []);
 
     useEffect(() => {
-        const totalFrames = TOTAL_FRAMES;
-        const frameDuration = FRAME_DURATION;
-        let lastFrameTime = 0;
         let animationFrameId;
 
-        const playVideoManually = (timestamp) => {
-            if (!lastFrameTime) {
-                lastFrameTime = timestamp;
-            }
+        console.log(allVideosLoaded);
+        if (isPlaying && allVideosLoaded) {
+            // Only start the animation frame if all videos are loaded
+            const totalFrames = TOTAL_FRAMES;
+            const frameDuration = FRAME_DURATION;
+            let lastFrameTime = 0;
 
-            const elapsed = timestamp - lastFrameTime;
+            const playVideoManually = (timestamp) => {
+                if (!lastFrameTime) {
+                    lastFrameTime = timestamp;
+                }
 
-            if (elapsed >= frameDuration) {
-                setCurrentFrame((prevFrame) => {
-                    const framesToAdvance = Math.floor(elapsed / frameDuration);
-                    const newFrame = prevFrame + framesToAdvance;
+                const elapsed = timestamp - lastFrameTime;
 
-                    if (newFrame >= totalFrames) {
-                        videoRefs.current.forEach((videoElement) => {
-                            if (videoElement) {
-                                videoElement.currentTime = 0;
-                            }
-                        });
-                        lastFrameTime = timestamp;
-                        return 0;
-                    } else {
-                        videoRefs.current.forEach((videoElement) => {
-                            if (
-                                videoElement &&
-                                videoElement.readyState >= 2 &&
-                                isSeekable(videoElement, newFrame / FPS)
-                            ) {
-                                videoElement.currentTime = newFrame / FPS;
-                            }
-                        });
-                        lastFrameTime += framesToAdvance * frameDuration;
-                        return newFrame;
-                    }
-                });
-            }
+                if (elapsed >= frameDuration) {
+                    setCurrentFrame((prevFrame) => {
+                        const framesToAdvance = Math.floor(
+                            elapsed / frameDuration
+                        );
+                        const newFrame = prevFrame + framesToAdvance;
 
-            animationFrameId = requestAnimationFrame(playVideoManually);
-        };
+                        if (newFrame >= totalFrames) {
+                            videoRefs.current.forEach((videoElement) => {
+                                if (videoElement) {
+                                    videoElement.currentTime = 0;
+                                }
+                            });
+                            lastFrameTime = timestamp;
+                            return 0;
+                        } else {
+                            videoRefs.current.forEach((videoElement) => {
+                                if (
+                                    videoElement &&
+                                    videoElement.readyState >= 2
+                                ) {
+                                    videoElement.currentTime = newFrame / FPS;
+                                }
+                            });
+                            lastFrameTime += framesToAdvance * frameDuration;
+                            return newFrame;
+                        }
+                    });
+                }
 
-        if (isPlaying) {
+                animationFrameId = requestAnimationFrame(playVideoManually);
+            };
+
             animationFrameId = requestAnimationFrame(playVideoManually);
         }
 
         return () => {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
         };
-    }, [isPlaying, videoRefs, setCurrentFrame]);
-
+    }, [isPlaying, videoRefs, allVideosLoaded, setCurrentFrame]);
     // (sigh) We need the blur overlay to make the search more prominent, but the map attributions
     // still show up on top of the blur. To avoid that, we manually hide the attributions when
     // the blur is active, and bring them back once the blur is off.
