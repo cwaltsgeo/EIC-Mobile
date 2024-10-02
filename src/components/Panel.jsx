@@ -30,7 +30,7 @@ export default function Panel() {
     const { chartData } = useContext(ChartDataContext);
 
     const [selectedDatasetIndex, setSelectedDatasetIndex] = useState(0);
-    const [selectedVariableIndex, setSelectedVariableIndex] = useState(0);
+    const [selectedVariableIndex, setSelectedVariableIndex] = useState(1);
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDataLayerModalOpen, setIsDataLayerModalOpen] = useState(false);

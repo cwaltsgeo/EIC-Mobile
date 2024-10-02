@@ -54,7 +54,10 @@ export default function ScenarioPickerModal({
                                     ? 'bg-[#010E26BF] text-white'
                                     : 'hover:bg-[#FFFFFF1A] bg-transparent'
                             }`}
-                            onClick={() => changeVariable(variableIndex)}
+                            onClick={() => {
+                                changeVariable(variableIndex);
+                                closeModal()
+                            }}
                         >
                             <div className="w-[24px] h-[24px] flex-shrink-0 flex items-center justify-center md:w-[32px] md:h-[32px]">
                                 <div

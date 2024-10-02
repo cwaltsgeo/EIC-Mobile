@@ -239,13 +239,15 @@ export default function Home() {
                     source: [imageElement, element],
                     title: variable.name,
                     zIndex: index,
-                    opacity: variable.name === '126 - Low' ? 1 : 0
+                    opacity: variable.name === '245 - Intermediate' ? 1 : 0
                 });
 
                 layerList.push(mediaLayer);
 
                 console.log(
-                    `Initializing video for: ${import.meta.env.BASE_URL}${variable.name}`,
+                    `Initializing video for: ${import.meta.env.BASE_URL}${
+                        variable.name
+                    }`,
                     variable.video
                 );
 
