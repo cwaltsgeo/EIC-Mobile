@@ -70,7 +70,7 @@ export default function Panel() {
         mapView.map.layers.forEach((layer) => {
             if (layer.type !== 'media') return;
 
-            if (layer.title === selectedVariable.name) {
+            if (layer.title.includes(selectedVariable.name)) {
                 layer.opacity = 1;
             } else {
                 layer.opacity = 0;
