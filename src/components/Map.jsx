@@ -23,7 +23,7 @@ import {
 } from '../contexts/AppContext';
 import * as geometryEngineAsync from '@arcgis/core/geometry/geometryEngineAsync';
 import { handleImageServiceRequest } from '../utils/utils';
-import { FPS, FRAME_DURATION, TOTAL_FRAMES } from '../utils/constants';
+import { FRAME_DURATION, TOTAL_FRAMES, FPS } from '../utils/constants';
 import { Transition } from '@headlessui/react';
 import Expand from '@arcgis/core/widgets/Expand';
 import { isMobileDevice } from '../utils/helpers';
@@ -59,6 +59,13 @@ export default function Home() {
     const { mapView, setMapView } = useContext(MapViewContext);
     const { setChartData } = useContext(ChartDataContext);
     const { dataSelection } = useContext(DataSelectionContext);
+    const [selectedDataset, selectedVariable] = dataSelection;
+
+    const selectedDatasetVariables = config.datasets[0].variables;
+
+    const selectedVariableIndex = selectedDatasetVariables.findIndex(
+        (variable) => variable.name === selectedVariable.name
+    );
 
     const [showTransition, setShowTransition] = useState(true);
     const [isShareMenuOpen, setIsShareMenuOpen] = useState(false);
@@ -254,7 +261,7 @@ export default function Home() {
                 element
                     .when((status) => {
                         const videoElement = element.content;
-                        videoRefs.current[videoIndex] = videoElement;
+                        videoRefs.current[index] = videoElement;
                         loadedVideos++;
                         console.log(
                             `Video initialized for: ${variable.name}`,
@@ -482,7 +489,7 @@ export default function Home() {
     };
 
     function isSeekable(videoElement, time) {
-        for (var i = 0; i < videoElement.seekable.length; i++) {
+        for (let i = 0; i < videoElement.seekable.length; i++) {
             if (
                 time >= videoElement.seekable.start(i) &&
                 time <= videoElement.seekable.end(i)
@@ -504,9 +511,7 @@ export default function Home() {
     useEffect(() => {
         let animationFrameId;
 
-        console.log(allVideosLoaded);
         if (isPlaying && allVideosLoaded) {
-            // Only start the animation frame if all videos are loaded
             const totalFrames = TOTAL_FRAMES;
             const frameDuration = FRAME_DURATION;
             let lastFrameTime = 0;
@@ -526,22 +531,25 @@ export default function Home() {
                         const newFrame = prevFrame + framesToAdvance;
 
                         if (newFrame >= totalFrames) {
-                            videoRefs.current.forEach((videoElement) => {
-                                if (videoElement) {
-                                    videoElement.currentTime = 0;
-                                }
-                            });
+                            const currentVideo =
+                                videoRefs.current[selectedVariableIndex];
+
+                            if (currentVideo) {
+                                currentVideo.currentTime = 0;
+                            }
                             lastFrameTime = timestamp;
                             return 0;
                         } else {
-                            videoRefs.current.forEach((videoElement) => {
-                                if (
-                                    videoElement &&
-                                    videoElement.readyState >= 2
-                                ) {
-                                    videoElement.currentTime = newFrame / FPS;
+                            const currentVideo =
+                                videoRefs.current[selectedVariableIndex];
+                            console.log(currentVideo.currentTime, currentVideo);
+
+                            if (currentVideo && currentVideo.readyState >= 2) {
+                                const seekTime = newFrame / FPS;
+                                if (isSeekable(currentVideo, seekTime)) {
+                                    currentVideo.currentTime = seekTime;
                                 }
-                            });
+                            }
                             lastFrameTime += framesToAdvance * frameDuration;
                             return newFrame;
                         }
@@ -557,7 +565,14 @@ export default function Home() {
         return () => {
             if (animationFrameId) cancelAnimationFrame(animationFrameId);
         };
-    }, [isPlaying, videoRefs, allVideosLoaded, setCurrentFrame]);
+    }, [
+        isPlaying,
+        videoRefs,
+        allVideosLoaded,
+        setCurrentFrame,
+        selectedVariableIndex
+    ]);
+
     // (sigh) We need the blur overlay to make the search more prominent, but the map attributions
     // still show up on top of the blur. To avoid that, we manually hide the attributions when
     // the blur is active, and bring them back once the blur is off.
@@ -573,7 +588,7 @@ export default function Home() {
     return (
         <div>
             <Transition
-                show={showTransition}
+                show={!allVideosLoaded && showTransition}
                 enter="transition-opacity duration-300"
                 enterFrom="opacity-0"
                 enterTo="opacity-100"

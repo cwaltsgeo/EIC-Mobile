@@ -15,7 +15,7 @@ import Tour from './components/Tour';
 
 export default function App() {
     const defaultDataset = config.datasets[0];
-    const defaultVariable = defaultDataset.variables[0];
+    const defaultVariable = defaultDataset.variables[1];
     const [dataSelection, setDataSelection] = useState([
         defaultDataset,
         defaultVariable
