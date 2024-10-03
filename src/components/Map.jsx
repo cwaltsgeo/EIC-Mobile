@@ -73,6 +73,7 @@ export default function Home() {
 
     const mapDiv = useRef(null);
     const blurOverlayRef = useRef(null);
+    const searchExpandRef = useRef(null);
 
     const [allVideosLoaded, setAllVideosLoaded] = useState(false);
     let totalVideos = 4;
@@ -246,14 +247,14 @@ export default function Home() {
                     source: [imageElement],
                     title: `${variable.name}_image`,
                     zIndex: index * 2,
-                    opacity: variable.name === '245 - Intermediate' ? 1 : 0
+                    opacity: variable.name === 'Intermediate' ? 1 : 0
                 });
 
                 const videoMediaLayer = new MediaLayer({
                     source: [videoElement],
                     title: `${variable.name}_video`,
                     zIndex: index * 2 + 1,
-                    opacity: variable.name === '245 - Intermediate' ? 1 : 0
+                    opacity: variable.name === 'Intermediate' ? 1 : 0
                 });
 
                 layerList.push(imageMediaLayer, videoMediaLayer);
@@ -278,7 +279,6 @@ export default function Home() {
                         videoElement.currentTime = currentFrame;
                         videoIndex++;
 
-                        console.log(loadedVideos, totalVideos);
                         if (loadedVideos === totalVideos) {
                             setAllVideosLoaded(true);
                         }
@@ -380,25 +380,32 @@ export default function Home() {
             mode: 'floating'
         });
 
+        searchExpandRef.current = searchExpand;
         view.ui.add(searchExpand, 'top-right');
 
+        // Toggle blur state when searchExpand is expanded or collapsed
         searchExpand.watch('expanded', (isExpanded) => {
             const blurOverlay = blurOverlayRef.current;
 
-            if (isExpanded && blurOverlay) {
+            if (!blurOverlay) return;
+
+            if (isExpanded) {
                 setIsBlurActive(true);
                 blurOverlay.classList.add('active');
-            } else if (blurOverlay) {
+            } else {
                 setIsBlurActive(false);
                 blurOverlay.classList.remove('active');
             }
         });
 
-        if (blurOverlayRef.current) {
-            blurOverlayRef.current.addEventListener('click', () => {
-                searchExpand.collapse();
-            });
-        }
+        // Reset blur state when a search starts
+        searchWidget.on('search-start', () => {
+            const blurOverlay = blurOverlayRef.current;
+            if (blurOverlay) {
+                setIsBlurActive(false);
+                blurOverlay.classList.remove('active');
+            }
+        });
 
         searchWidget.on('select-result', async (event) => {
             const result = event.result;
@@ -548,7 +555,6 @@ export default function Home() {
                         } else {
                             const currentVideo =
                                 videoRefs.current[selectedVariableIndex];
-                            console.log(currentVideo.currentTime, currentVideo);
 
                             if (currentVideo && currentVideo.readyState >= 2) {
                                 const seekTime = newFrame / FPS;
@@ -584,11 +590,52 @@ export default function Home() {
     // the blur is active, and bring them back once the blur is off.
     useEffect(() => {
         const attribution = document.querySelector('.esri-attribution');
-        if ((isBlurActive || showTransition) && attribution) {
-            attribution.style.display = 'none';
-        } else if (attribution) {
-            attribution.style.display = 'flex';
+
+        if (attribution) {
+            attribution.style.display =
+                isBlurActive || showTransition ? 'none' : 'flex';
         }
+
+        const handleDocumentClick = (event) => {
+            const searchExpand = searchExpandRef.current;
+            const blurOverlay = blurOverlayRef.current;
+
+            if (!searchExpand || !blurOverlay) return;
+
+            const isClickInsideSearchExpand = searchExpand.domNode.contains(
+                event.target
+            );
+            const isClickInsideBlurOverlay = blurOverlay.contains(event.target);
+
+            if (
+                isBlurActive &&
+                !isClickInsideSearchExpand &&
+                !isClickInsideBlurOverlay
+            ) {
+                searchExpand.collapse();
+            }
+        };
+
+        const handleBlurOverlayClick = () => {
+            const searchExpand = searchExpandRef.current;
+            if (searchExpand) {
+                searchExpand.collapse();
+            }
+        };
+
+        document.addEventListener('click', handleDocumentClick);
+        blurOverlayRef.current?.addEventListener(
+            'click',
+            handleBlurOverlayClick
+        );
+
+        return () => {
+            document.removeEventListener('click', handleDocumentClick);
+            blurOverlayRef.current?.removeEventListener(
+                'click',
+                handleBlurOverlayClick
+            );
+        };
     }, [isBlurActive, showTransition]);
 
     return (

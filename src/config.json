@@ -5,7 +5,7 @@
             "datasetVariablesTagline": "GHG Emissions Scenario",
             "variables": [
                 {
-                    "name": "126 - Low",
+                    "name": "Low",
                     "description": "Carbon dioxide emissions decline to net zero around 2070, followed by varying levels of reductions in existing carbon dioxide in the atmosphere.",
                     "variable": "tasmax_ssp126",
                     "unit": "Heatmax",
@@ -37,7 +37,7 @@
                     ]
                 },
                 {
-                    "name": "245 - Intermediate",
+                    "name": "Intermediate",
                     "description": "Carbon dioxide emissions remain around current levels until the middle of the 21st century.",
                     "unit": "Heatmax",
                     "variable": "tasmax_ssp245",
@@ -69,7 +69,7 @@
                     ]
                 },
                 {
-                    "name": "370 - High",
+                    "name": "High",
                     "description": "Carbon dioxide emissions roughly double from current levels by 2100.",
                     "unit": "Heatmax",
                     "variable": "tasmax_ssp370",
@@ -101,7 +101,7 @@
                     ]
                 },
                 {
-                    "name": "585 - Very High",
+                    "name": "Very High",
                     "description": "Carbon dioxide emissions roughly double from current levels by 2050.",
                     "unit": "Heatmax",
                     "video": "./tasmax_monthly_ssp585_max12_8192_1024x512.mp4",
