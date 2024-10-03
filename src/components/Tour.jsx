@@ -16,7 +16,7 @@ export default function Tour() {
         {
             target: 'body',
             title: 'Welcome to the',
-            name: 'Mobile Climate Mapper!',
+            name: 'Mobile Climate Mapper',
             content:
                 'The Mobile Climate Mapper is an extension of NASA’s Earth Information Center exhibit at the Smithsonian National Museum of Natural History. Use this tool to explore how climate change may affect temperatures at any location in the world.',
             placement: 'center',
