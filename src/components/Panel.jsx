@@ -175,7 +175,7 @@ export default function Panel() {
                                                         selectedDatasetIndex
                                                     ].variables[
                                                         selectedVariableIndex
-                                                    ].shortName
+                                                    ].name
                                                 }
                                             </span>
                                             <ArrowRightIcon className="ml-2 h-4 w-4" />
