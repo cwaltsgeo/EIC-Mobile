@@ -247,14 +247,14 @@ export default function Home() {
                     source: [imageElement],
                     title: `${variable.name}_image`,
                     zIndex: index * 2,
-                    opacity: variable.name === 'Intermediate' ? 1 : 0
+                    opacity: variable.name === '245 - Intermediate' ? 1 : 0
                 });
 
                 const videoMediaLayer = new MediaLayer({
                     source: [videoElement],
                     title: `${variable.name}_video`,
                     zIndex: index * 2 + 1,
-                    opacity: variable.name === 'Intermediate' ? 1 : 0
+                    opacity: variable.name === '245 - Intermediate' ? 1 : 0
                 });
 
                 layerList.push(imageMediaLayer, videoMediaLayer);
