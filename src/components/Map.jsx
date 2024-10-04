@@ -16,6 +16,7 @@ import SceneView from '@arcgis/core/views/SceneView';
 import Search from '@arcgis/core/widgets/Search';
 import Popup from '@arcgis/core/widgets/Popup';
 import { VideoContext } from '../contexts/VideoContext';
+import { DataFetchingContext } from '../contexts/DataFetchingContext';
 import {
     ChartDataContext,
     MapViewContext,
@@ -59,6 +60,8 @@ export default function Home() {
     const { mapView, setMapView } = useContext(MapViewContext);
     const { setChartData } = useContext(ChartDataContext);
     const { dataSelection } = useContext(DataSelectionContext);
+    const { setIsLoading, setIsInvalidData } = useContext(DataFetchingContext);
+
     const [selectedDataset, selectedVariable] = dataSelection;
 
     const selectedDatasetVariables = config.datasets[0].variables;
@@ -456,48 +459,58 @@ export default function Home() {
         const dataIsValid = await handleImageServiceRequest(
             event,
             selectedVariable,
-            setChartData
+            setChartData,
+            setIsLoading,
+            setIsInvalidData
         );
 
         if (!dataIsValid) {
-            const defaultScenePoint = new Point({
-                longitude: -77.0369,
-                latitude: 38.9072,
-                spatialReference: { wkid: 4326 }
-            });
-
-            if (
-                Math.abs(
-                    event.mapPoint.longitude - defaultScenePoint.longitude
-                ) > 0.0001 ||
-                Math.abs(event.mapPoint.latitude - defaultScenePoint.latitude) >
-                    0.0001
-            ) {
-                await view.goTo({
-                    center: [
-                        defaultScenePoint.longitude,
-                        defaultScenePoint.latitude
-                    ],
-                    zoom: 10
+            setTimeout(async () => {
+                const defaultScenePoint = new Point({
+                    longitude: -77.0369,
+                    latitude: 38.9072,
+                    spatialReference: { wkid: 4326 }
                 });
 
-                await createBuffer(defaultScenePoint, pointLayer, bufferLayer);
+                if (
+                    Math.abs(
+                        event.mapPoint.longitude - defaultScenePoint.longitude
+                    ) > 0.0001 ||
+                    Math.abs(
+                        event.mapPoint.latitude - defaultScenePoint.latitude
+                    ) > 0.0001
+                ) {
+                    await view.goTo({
+                        center: [
+                            defaultScenePoint.longitude,
+                            defaultScenePoint.latitude
+                        ],
+                        zoom: 10
+                    });
 
-                const eventForDC = { mapPoint: defaultScenePoint };
-                const dataIsValidDC = await handleImageServiceRequest(
-                    eventForDC,
-                    selectedVariable,
-                    setChartData
-                );
+                    await createBuffer(
+                        defaultScenePoint,
+                        pointLayer,
+                        bufferLayer
+                    );
 
-                if (!dataIsValidDC) {
+                    const eventForDC = { mapPoint: defaultScenePoint };
+                    const dataIsValidDC = await handleImageServiceRequest(
+                        eventForDC,
+                        selectedVariable,
+                        setChartData,
+                        setIsLoading,
+                        setIsInvalidData
+                    );
+
+                    if (!dataIsValidDC) {
+                        console.error('Data is invalid even for Washington DC');
+                    }
+                } else {
                     console.error('Data is invalid even for Washington DC');
                     setChartData([]);
                 }
-            } else {
-                console.error('Data is invalid even for Washington DC');
-                setChartData([]);
-            }
+            }, 1000);
         }
     };
 
