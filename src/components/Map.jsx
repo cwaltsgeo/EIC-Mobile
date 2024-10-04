@@ -146,13 +146,17 @@ export default function Home() {
             symbol: middleBufferSymbol
         });
 
+        const crosshairGraphic = new Graphic({
+            geometry: point,
+            symbol: crosshairSymbol
+        });
+
         if (!pointLayer.graphics.length) {
-            pointLayer.add(
-                new Graphic({ geometry: point, symbol: crosshairSymbol })
-            );
+            pointLayer.add(crosshairGraphic);
             bufferLayer.add(middleBufferGraphic);
             bufferLayer.add(bufferGraphic);
         } else {
+            console.log(point)
             pointLayer.graphics.getItemAt(0).geometry = point;
             bufferLayer.graphics.getItemAt(0).geometry = middleCircle;
             bufferLayer.graphics.getItemAt(0).symbol = middleBufferSymbol;
@@ -475,6 +479,11 @@ export default function Home() {
 
     const handleMapClick = async (event, view) => {
         const [_, selectedVariable] = dataSelection;
+
+        // round event latitude and longitude to the nearest quarter
+        //  degree to snap to grid
+        event.mapPoint.latitude = Math.round(event.mapPoint.latitude * 4) / 4;
+        event.mapPoint.longitude = Math.round(event.mapPoint.longitude * 4) / 4;
 
         const dataIsValid = await handleImageServiceRequest(
             event,
