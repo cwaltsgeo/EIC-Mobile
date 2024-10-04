@@ -132,9 +132,8 @@ export default function Home() {
             bufferLayer.add(middleBufferGraphic);
         } else {
             pointLayer.graphics.getItemAt(0).geometry = point;
-
-            bufferLayer.graphics.getItemAt(1).geometry = middleCircle;
-            bufferLayer.graphics.getItemAt(1).symbol = middleBufferSymbol;
+            bufferLayer.graphics.getItemAt(0).geometry = middleCircle;
+            bufferLayer.graphics.getItemAt(0).symbol = middleBufferSymbol;
         }
     };
 
