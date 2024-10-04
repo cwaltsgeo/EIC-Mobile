@@ -6,7 +6,7 @@ export default function DataLayerModal({
     setIsFahrenheit
 }) {
 
-    const [ showPageTwo, setShowPageTwo ] = useState(true);
+    const [ showPageTwo, setShowPageTwo ] = useState(false);
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -47,6 +47,17 @@ export default function DataLayerModal({
 
                 <div className="w-full max-w-[760px] bg-transparent">
                     { showPageTwo ? <PageTwo /> : <PageOne /> }
+                    <button
+                        className={`px-4 py-2 border rounded-l-lg text-[14px] font-semibold bg-[#14367D] text-white `}
+                        style={{
+                            borderRadius: '4px 0 0 4px',
+                            padding: '8px 12px',
+                            border: '1px solid #FFFFFF26',
+                        }}
+                        onClick={() => setShowPageTwo(prevShowPageTwo => ! prevShowPageTwo)}
+                    >
+                        Swap pages
+                    </button>
                     <Buttons {...{isFahrenheit, setIsFahrenheit}}/>
                 </div>
             </div>
@@ -57,33 +68,42 @@ export default function DataLayerModal({
 function PageTwo({}){
     return(
         <> 
-            <div className='w-1/2'>
+            <div className='w-full flex flex-row justify-center'>
                 <img
-                    className='w-full'
+                    className='w-4/5'
                     src="temp-disclaimer.png"
                     alt="Example of spatial average of temperature for Los Angeles, CA"
                 />
             </div>
-            <p className="h-1/4 text-[16px] text-gray-300 text-left mb-6 leading-[24px] overflow-y-scroll">
-                The NEX-GDDP-CMIP6 data is calculated on a 0.25°x0.25° latitude and longitude, which is a system of lines used to map the sphere of the Earth.
-                In some cases, temperature in major cities could be higher than what’s displayed in the gridded cell because it includes a larger area than just that city.
-                For example, if you search for a city, such as Los Angeles, CA the average will include the temperature of Los Angeles (which could be higher than average) plus the surrounding geographical area (which could be lower than average).
-            </p>
+            <Disclaimer className={'border rounded-lg border-gray-300/50 p-2 overflow-y-scroll'} />
         </>
     );
 
 }
 function PageOne({}){
 
-    return (<>
-            <p className="text-[16px] text-gray-300 text-left mb-6 leading-[24px]">
+    return (
+        <div className="text-[16px] text-gray-300 text-left mb-6 leading-[24px]">
+            <p>
                 How hot could it get on the hottest day in a given year, under different greenhouse gas emission scenarios?
             </p>
-        <p className="text-[16px] text-gray-300 text-left mb-6 leading-[24px]">
-            See estimates of annual maxima of daily maximum near-surface air temperature (TASMAX) from NASA Earth Exchange (NEX) Global Daily Downscaled Projections (GDDP) based on simulations of the Coupled Model Intercomparison Project Phase 6 (CMIP6).                   
-        </p>
-
-    </>);
+            <br/>
+            <p>
+                See estimates of annual maxima of daily maximum near-surface air temperature (TASMAX) from NASA Earth Exchange (NEX) Global Daily Downscaled Projections (GDDP) based on simulations of the Coupled Model Intercomparison Project Phase 6 (CMIP6).                   
+            </p>
+            <br/>
+            <p>
+                Learn more about the
+                {' '}
+                <a
+                    href="https://earth.gov/data-catalog/cmip6-climdex-tasmax-yearly-median"
+                    className='text-red-500'
+                >
+                    NEX-GDDP-CMIP6 dataset
+                </a>!
+            </p>
+        </div>
+    );
 }
 
 function Buttons({isFahrenheit, setIsFahrenheit}){
@@ -117,4 +137,25 @@ function Buttons({isFahrenheit, setIsFahrenheit}){
             </button>
         </div>
     );
+}
+
+export function Disclaimer({className}){
+
+    return (
+        <p className={`
+                h-1/4 text-[16px]
+                text-gray-300
+                text-left 
+                mb-6
+                leading-[24px]
+                ${className}
+                `}
+            >
+                The NEX-GDDP-CMIP6 data is calculated on a 0.25°x0.25° latitude and longitude, which is a system of lines used to map the sphere of the Earth.
+                In some cases, temperature in major cities could be higher than what’s displayed in the gridded cell because it includes a larger area than just that city.
+                For example, if you search for a city, such as Los Angeles, CA the average will include the temperature of Los Angeles (which could be higher than average) plus the surrounding geographical area (which could be lower than average).
+            </p>
+
+    );
+
 }
