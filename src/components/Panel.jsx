@@ -251,7 +251,7 @@ export default function Panel() {
                                                 This dataset does not provide
                                                 temperature information for
                                                 oceans. Moving the map marker to
-                                                the last land location...
+                                                the default location...
                                             </p>
                                         </div>
                                     )}
