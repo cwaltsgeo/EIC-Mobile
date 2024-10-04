@@ -48,7 +48,7 @@ export default function DataLayerModal({
                     <p className="text-[16px] text-gray-300 text-left mb-6 leading-[24px]">
                         See estimates of annual maxima of daily maximum near-surface air temperature (TASMAX) from NASA Earth Exchange (NEX) Global Daily Downscaled Projections (GDDP) based on simulations of the Coupled Model Intercomparison Project Phase 6 (CMIP6).                    </p>
                     <p className="text-[16px] text-gray-300 text-left mb-6 leading-[24px]">
-                        The NEX-GDDP-CMIP6 data is calculated on a 0.25°x0.25° latitude and longitude grid and temperature in major cities could be higher than what is displayed within each gridded cell.                        </p>
+                        The NEX-GDDP-CMIP6 data is calculated on a 0.25°x0.25° latitude and longitude, which is a system of lines used to map the sphere of the Earth. In some cases, temperature in major cities could be higher than what’s displayed in the gridded cell because it includes a larger area than just that city. For example, if you search for a city, such as Los Angeles, CA the average will include the temperature of Los Angeles (which could be higher than average) plus the surrounding geographical area (which could be lower than average).                        </p>
                     <div className="flex justify-start mt-8">
                         <button
                             className={`px-4 py-2 border rounded-l-lg text-[14px] font-semibold transition-colors ${
