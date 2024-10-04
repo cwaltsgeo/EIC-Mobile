@@ -47,17 +47,7 @@ export default function DataLayerModal({
 
                 <div className="w-full max-w-[760px] bg-transparent">
                     { showPageTwo ? <PageTwo /> : <PageOne /> }
-                    <button
-                        className={`px-4 py-2 border rounded-l-lg text-[14px] font-semibold bg-[#14367D] text-white `}
-                        style={{
-                            borderRadius: '4px 0 0 4px',
-                            padding: '8px 12px',
-                            border: '1px solid #FFFFFF26',
-                        }}
-                        onClick={() => setShowPageTwo(prevShowPageTwo => ! prevShowPageTwo)}
-                    >
-                        Swap pages
-                    </button>
+                    {/* <SwapButton {...{setShowPageTwo}} />  */}
                     <Buttons {...{isFahrenheit, setIsFahrenheit}}/>
                 </div>
             </div>
@@ -66,6 +56,7 @@ export default function DataLayerModal({
 }
 
 function PageTwo({}){
+    // ABG: https://cdn.dribbble.com/users/716122/screenshots/14300379/media/44f698e864671ffe25b844469e40de42.jpg?resize=400x300&vertical=center
     return(
         <> 
             <div className='w-full flex flex-row justify-center'>
@@ -97,7 +88,7 @@ function PageOne({}){
                 {' '}
                 <a
                     href="https://earth.gov/data-catalog/cmip6-climdex-tasmax-yearly-median"
-                    className='text-red-500'
+                    className='underline'
                 >
                     NEX-GDDP-CMIP6 dataset
                 </a>!
@@ -158,4 +149,18 @@ export function Disclaimer({className}){
 
     );
 
+}
+
+function SwapButton({setShowPageTwo}){
+    return <button
+        className={`px-4 py-2 border rounded-l-lg text-[14px] font-semibold bg-[#14367D] text-white `}
+        style={{
+            borderRadius: '4px 0 0 4px',
+            padding: '8px 12px',
+            border: '1px solid #FFFFFF26',
+        }}
+        onClick={() => setShowPageTwo(prevShowPageTwo => ! prevShowPageTwo)}
+    >
+        Swap pages
+    </button>
 }
