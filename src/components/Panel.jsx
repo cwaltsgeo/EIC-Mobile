@@ -70,7 +70,13 @@ export default function Panel() {
         mapView.map.layers.forEach((layer) => {
             if (layer.type !== 'media') return;
 
-            if (layer.title.includes(selectedVariable.name)) {
+            const variableName = selectedVariable.name;
+            const validTitles = [
+                `${variableName}_image`,
+                `${variableName}_video`
+            ];
+
+            if (validTitles.includes(layer.title)) {
                 layer.opacity = 1;
             } else {
                 layer.opacity = 0;
