@@ -28,7 +28,7 @@ import { FRAME_DURATION, TOTAL_FRAMES, FPS } from '../utils/constants';
 import { Transition } from '@headlessui/react';
 import Expand from '@arcgis/core/widgets/Expand';
 import { isMobileDevice } from '../utils/helpers';
-import { crosshairSymbol } from '../utils/sceneHelpers';
+import { crosshairSymbol, bufferSymbol } from '../utils/sceneHelpers';
 import { debounce } from 'lodash';
 
 import ShareModal from './ShareModal';
@@ -110,9 +110,30 @@ export default function Home() {
 
         const middleBufferSymbol = {
             type: 'simple-fill',
-            color: [5, 50, 180, 0.4],
-            outline: { color: [255, 255, 255, 0], width: 0 }
+            color: [150, 50, 0, 0.0],
+            outline: { color: [255, 255, 255, 1], width: 2,  style:"dash"}
         };
+
+        const sideLength = 0.25*scaleFactor;
+        const squarePolygon = {
+            type: 'polygon',
+            rings: [
+                [
+                    [point.x - sideLength / 2, point.y - sideLength / 2],
+                    [point.x + sideLength / 2, point.y - sideLength / 2],
+                    [point.x + sideLength / 2, point.y + sideLength / 2],
+                    [point.x - sideLength / 2, point.y + sideLength / 2],
+                    [point.x - sideLength / 2, point.y - sideLength / 2]
+                ]
+            ],
+            spatialReference: point.spatialReference
+        };
+
+        const bufferGraphic = new Graphic({
+            geometry: squarePolygon,
+            symbol: bufferSymbol
+        });
+
 
         const middleCircle = await geometryEngineAsync.geodesicBuffer(
             point,
@@ -130,10 +151,13 @@ export default function Home() {
                 new Graphic({ geometry: point, symbol: crosshairSymbol })
             );
             bufferLayer.add(middleBufferGraphic);
+            bufferLayer.add(bufferGraphic);
         } else {
             pointLayer.graphics.getItemAt(0).geometry = point;
             bufferLayer.graphics.getItemAt(0).geometry = middleCircle;
             bufferLayer.graphics.getItemAt(0).symbol = middleBufferSymbol;
+            bufferLayer.graphics.getItemAt(1).geometry = squarePolygon;
+            bufferLayer.graphics.getItemAt(1).symbol = bufferSymbol;
         }
     };
 
