@@ -156,7 +156,6 @@ export default function Home() {
             bufferLayer.add(middleBufferGraphic);
             bufferLayer.add(bufferGraphic);
         } else {
-            console.log(point)
             pointLayer.graphics.getItemAt(0).geometry = point;
             bufferLayer.graphics.getItemAt(0).geometry = middleCircle;
             bufferLayer.graphics.getItemAt(0).symbol = middleBufferSymbol;
