@@ -8,7 +8,7 @@ export const crosshairSymbol = {
     type: 'simple-marker',
     style: 'cross',
     color: [5, 80, 216],
-    size: 12,
+    size: 4,
     outline: {
         color: [255, 255, 255],
         width: 1
