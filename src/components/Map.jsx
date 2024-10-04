@@ -29,8 +29,15 @@ import { Transition } from '@headlessui/react';
 import Expand from '@arcgis/core/widgets/Expand';
 import { isMobileDevice } from '../utils/helpers';
 import { crosshairSymbol } from '../utils/sceneHelpers';
+import { debounce } from 'lodash';
 
 import ShareModal from './ShareModal';
+
+const defaultScenePoint = new Point({
+    longitude: -77.0369,
+    latitude: 38.9072,
+    spatialReference: { wkid: 4326 }
+});
 
 const createFeatureLayer = (url) =>
     new FeatureLayer({
@@ -80,7 +87,7 @@ export default function Home() {
 
     let draggingInsideBuffer = false;
     let initialCamera;
-    let lastKnownPoint;
+    let lastKnownPoint = defaultScenePoint;
     let bufferLayer;
     let pointLayer;
 
@@ -91,10 +98,19 @@ export default function Home() {
 
         return { bufferLayer, pointLayer };
     };
-    const createBuffer = async (point, pointLayer, bufferLayer) => {
-        const outerRadius = 500;
-        const middleRadius = 300;
-        const innerRadius = 100;
+
+    const createBuffer = async (point, pointLayer, bufferLayer, view) => {
+        const zoomLevel = view.zoom;
+
+        const baseOuterRadius = 500;
+        const baseMiddleRadius = 300;
+        const baseInnerRadius = 100;
+
+        const scaleFactor = zoomLevel / 3;
+
+        const outerRadius = baseOuterRadius / scaleFactor;
+        const middleRadius = baseMiddleRadius / scaleFactor;
+        const innerRadius = baseInnerRadius / scaleFactor;
 
         const outerBufferSymbol = {
             type: 'simple-fill',
@@ -165,6 +181,8 @@ export default function Home() {
         }
     };
 
+    const debouncedCreateBuffer = debounce(createBuffer, 100);
+
     const handleDragStart = async (event, view, bufferLayer) => {
         const startPoint = view.toMap({ x: event.x, y: event.y });
         const bufferGraphic = bufferLayer.graphics.getItemAt(0);
@@ -189,7 +207,7 @@ export default function Home() {
 
             if (updatedPoint) {
                 event.stopPropagation();
-                await createBuffer(updatedPoint, pointLayer, bufferLayer);
+                await createBuffer(updatedPoint, pointLayer, bufferLayer, view);
                 lastKnownPoint = updatedPoint;
             }
         }
@@ -350,7 +368,12 @@ export default function Home() {
                 ],
                 zoom: 1
             });
-            await createBuffer(initialCenterPoint, pointLayer, bufferLayer);
+            await createBuffer(
+                initialCenterPoint,
+                pointLayer,
+                bufferLayer,
+                view
+            );
             await handleMapClick({ mapPoint: initialCenterPoint });
 
             view.on('drag', (event) => {
@@ -367,9 +390,20 @@ export default function Home() {
                 const mapPoint = view.toMap(event);
 
                 if (mapPoint) {
-                    await createBuffer(mapPoint, pointLayer, bufferLayer);
+                    await createBuffer(mapPoint, pointLayer, bufferLayer, view);
                     lastKnownPoint = mapPoint;
                     await handleMapClick({ mapPoint }, view);
+                }
+            });
+
+            view.watch('zoom', () => {
+                if (lastKnownPoint) {
+                    debouncedCreateBuffer(
+                        lastKnownPoint,
+                        pointLayer,
+                        bufferLayer,
+                        view
+                    );
                 }
             });
         }).catch((error) => {
@@ -428,7 +462,7 @@ export default function Home() {
 
                 view.graphics.removeAll();
 
-                await createBuffer(point, pointLayer, bufferLayer);
+                await createBuffer(point, pointLayer, bufferLayer, view);
                 lastKnownPoint = point;
 
                 await handleMapClick({ mapPoint: point }, view);
@@ -471,13 +505,9 @@ export default function Home() {
         );
 
         if (!dataIsValid) {
-            setTimeout(async () => {
-                const defaultScenePoint = new Point({
-                    longitude: -77.0369,
-                    latitude: 38.9072,
-                    spatialReference: { wkid: 4326 }
-                });
+            lastKnownPoint = defaultScenePoint;
 
+            setTimeout(async () => {
                 if (
                     Math.abs(
                         event.mapPoint.longitude - defaultScenePoint.longitude
@@ -497,7 +527,8 @@ export default function Home() {
                     await createBuffer(
                         defaultScenePoint,
                         pointLayer,
-                        bufferLayer
+                        bufferLayer,
+                        view
                     );
 
                     const eventForDC = { mapPoint: defaultScenePoint };
