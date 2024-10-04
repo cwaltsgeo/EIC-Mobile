@@ -28,11 +28,7 @@ import { FRAME_DURATION, TOTAL_FRAMES, FPS } from '../utils/constants';
 import { Transition } from '@headlessui/react';
 import Expand from '@arcgis/core/widgets/Expand';
 import { isMobileDevice } from '../utils/helpers';
-import {
-    bufferSymbol,
-    crosshairSymbol,
-    createCornerAngles
-} from '../utils/sceneHelpers';
+import { crosshairSymbol } from '../utils/sceneHelpers';
 
 import ShareModal from './ShareModal';
 
@@ -95,67 +91,77 @@ export default function Home() {
 
         return { bufferLayer, pointLayer };
     };
-
     const createBuffer = async (point, pointLayer, bufferLayer) => {
-        const sideLength = 10;
+        const outerRadius = 500;
+        const middleRadius = 300;
+        const innerRadius = 100;
 
-        const squarePolygon = {
-            type: 'polygon',
-            rings: [
-                [
-                    [point.x - sideLength / 2, point.y - sideLength / 2],
-                    [point.x + sideLength / 2, point.y - sideLength / 2],
-                    [point.x + sideLength / 2, point.y + sideLength / 2],
-                    [point.x - sideLength / 2, point.y + sideLength / 2],
-                    [point.x - sideLength / 2, point.y - sideLength / 2]
-                ]
-            ],
-            spatialReference: point.spatialReference
+        const outerBufferSymbol = {
+            type: 'simple-fill',
+            color: [5, 80, 216, 0.3],
+            outline: { color: [255, 255, 255, 0], width: 0 }
         };
 
-        const cornerAngles = createCornerAngles(point, sideLength);
-
-        const angleSymbol = {
-            type: 'simple-line',
-            color: [255, 255, 255],
-            width: 1
+        const middleBufferSymbol = {
+            type: 'simple-fill',
+            color: [5, 50, 180, 0.4],
+            outline: { color: [255, 255, 255, 0], width: 0 }
         };
 
-        const bufferGraphic = new Graphic({
-            geometry: squarePolygon,
-            symbol: bufferSymbol
+        const innerBufferSymbol = {
+            type: 'simple-fill',
+            color: [5, 30, 150, 0.5],
+            outline: { color: [255, 255, 255, 0], width: 0 }
+        };
+
+        const outerCircle = await geometryEngineAsync.geodesicBuffer(
+            point,
+            outerRadius,
+            'kilometers'
+        );
+        const middleCircle = await geometryEngineAsync.geodesicBuffer(
+            point,
+            middleRadius,
+            'kilometers'
+        );
+        const innerCircle = await geometryEngineAsync.geodesicBuffer(
+            point,
+            innerRadius,
+            'kilometers'
+        );
+
+        const outerBufferGraphic = new Graphic({
+            geometry: outerCircle,
+            symbol: outerBufferSymbol
+        });
+
+        const middleBufferGraphic = new Graphic({
+            geometry: middleCircle,
+            symbol: middleBufferSymbol
+        });
+
+        const innerBufferGraphic = new Graphic({
+            geometry: innerCircle,
+            symbol: innerBufferSymbol
         });
 
         if (!pointLayer.graphics.length) {
             pointLayer.add(
                 new Graphic({ geometry: point, symbol: crosshairSymbol })
             );
-            bufferLayer.add(bufferGraphic);
-
-            cornerAngles.forEach((cornerGeometry) => {
-                bufferLayer.add(
-                    new Graphic({
-                        geometry: cornerGeometry,
-                        symbol: angleSymbol
-                    })
-                );
-            });
+            bufferLayer.add(outerBufferGraphic);
+            bufferLayer.add(middleBufferGraphic);
+            bufferLayer.add(innerBufferGraphic);
         } else {
             pointLayer.graphics.getItemAt(0).geometry = point;
+            bufferLayer.graphics.getItemAt(0).geometry = outerCircle;
+            bufferLayer.graphics.getItemAt(0).symbol = outerBufferSymbol;
 
-            bufferLayer.graphics.getItemAt(0).geometry = squarePolygon;
-            bufferLayer.graphics.getItemAt(0).symbol = bufferSymbol;
+            bufferLayer.graphics.getItemAt(1).geometry = middleCircle;
+            bufferLayer.graphics.getItemAt(1).symbol = middleBufferSymbol;
 
-            bufferLayer.removeAll();
-            bufferLayer.add(bufferGraphic);
-            cornerAngles.forEach((cornerGeometry) => {
-                bufferLayer.add(
-                    new Graphic({
-                        geometry: cornerGeometry,
-                        symbol: angleSymbol
-                    })
-                );
-            });
+            bufferLayer.graphics.getItemAt(2).geometry = innerCircle;
+            bufferLayer.graphics.getItemAt(2).symbol = innerBufferSymbol;
         }
     };
 
