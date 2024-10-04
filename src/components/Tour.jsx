@@ -18,14 +18,14 @@ export default function Tour() {
             title: 'Welcome to the',
             name: 'Mobile Climate Mapper',
             content:
-                'The Mobile Climate Mapper is an extension of NASA’s Earth Information Center exhibit at the Smithsonian National Museum of Natural History. Use this tool to explore how climate change may affect temperatures at any location in the world.',
+                'The Mobile Climate Mapper is an extension of NASA’s Earth Information Center exhibit at the Smithsonian National Museum of Natural History. Use this tool to explore how climate change may affect temperatures in any geographic area in the world.',
             placement: 'center',
             disableBeacon: true
         },
         {
             target: '.map',
             content:
-                'Tap anywhere on the map to view how temperatures are projected to change at that location',
+                'Tap anywhere on the map to view how temperatures are projected to change in that geographic area',
             placement: 'bottom',
             disableBeacon: true
         },
