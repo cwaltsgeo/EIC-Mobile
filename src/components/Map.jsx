@@ -102,21 +102,11 @@ export default function Home() {
     const createBuffer = async (point, pointLayer, bufferLayer, view) => {
         const zoomLevel = view.zoom;
 
-        const baseOuterRadius = 500;
         const baseMiddleRadius = 300;
-        const baseInnerRadius = 100;
 
         const scaleFactor = zoomLevel / 3;
 
-        const outerRadius = baseOuterRadius / scaleFactor;
         const middleRadius = baseMiddleRadius / scaleFactor;
-        const innerRadius = baseInnerRadius / scaleFactor;
-
-        const outerBufferSymbol = {
-            type: 'simple-fill',
-            color: [5, 80, 216, 0.3],
-            outline: { color: [255, 255, 255, 0], width: 0 }
-        };
 
         const middleBufferSymbol = {
             type: 'simple-fill',
@@ -124,60 +114,27 @@ export default function Home() {
             outline: { color: [255, 255, 255, 0], width: 0 }
         };
 
-        const innerBufferSymbol = {
-            type: 'simple-fill',
-            color: [5, 30, 150, 0.5],
-            outline: { color: [255, 255, 255, 0], width: 0 }
-        };
-
-        const outerCircle = await geometryEngineAsync.geodesicBuffer(
-            point,
-            outerRadius,
-            'kilometers'
-        );
         const middleCircle = await geometryEngineAsync.geodesicBuffer(
             point,
             middleRadius,
             'kilometers'
         );
-        const innerCircle = await geometryEngineAsync.geodesicBuffer(
-            point,
-            innerRadius,
-            'kilometers'
-        );
-
-        const outerBufferGraphic = new Graphic({
-            geometry: outerCircle,
-            symbol: outerBufferSymbol
-        });
 
         const middleBufferGraphic = new Graphic({
             geometry: middleCircle,
             symbol: middleBufferSymbol
         });
 
-        const innerBufferGraphic = new Graphic({
-            geometry: innerCircle,
-            symbol: innerBufferSymbol
-        });
-
         if (!pointLayer.graphics.length) {
             pointLayer.add(
                 new Graphic({ geometry: point, symbol: crosshairSymbol })
             );
-            bufferLayer.add(outerBufferGraphic);
             bufferLayer.add(middleBufferGraphic);
-            bufferLayer.add(innerBufferGraphic);
         } else {
             pointLayer.graphics.getItemAt(0).geometry = point;
-            bufferLayer.graphics.getItemAt(0).geometry = outerCircle;
-            bufferLayer.graphics.getItemAt(0).symbol = outerBufferSymbol;
 
             bufferLayer.graphics.getItemAt(1).geometry = middleCircle;
             bufferLayer.graphics.getItemAt(1).symbol = middleBufferSymbol;
-
-            bufferLayer.graphics.getItemAt(2).geometry = innerCircle;
-            bufferLayer.graphics.getItemAt(2).symbol = innerBufferSymbol;
         }
     };
 
